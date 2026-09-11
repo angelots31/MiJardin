@@ -1,0 +1,100 @@
+.carousel {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.carousel-imagen-contenedor {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 420px;
+  overflow: hidden;
+  border-radius: 20px;
+  background-color: var(--verde-oscuro-2);
+}
+
+.carousel-imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.carousel-flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(35, 57, 46, 0.85);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  font-size: 1.6rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.carousel-flecha-izq {
+  left: 12px;
+}
+
+.carousel-flecha-der {
+  right: 12px;
+}
+
+.carousel-flecha:hover {
+  background-color: var(--terracota);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.carousel-info {
+  margin-top: 1.3rem;
+}
+
+.carousel-info h3 {
+  margin: 0.3rem 0;
+  color: var(--verde-oscuro);
+  font-size: 1.5rem;
+}
+
+.carousel-info p {
+  max-width: 560px;
+  margin: 0.5rem auto 0;
+  color: #3d3d35;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.carousel-indicadores {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+}
+
+.carousel-punto {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--crema-2);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.carousel-punto.activo {
+  background-color: var(--terracota);
+  transform: scale(1.2);
+}
+
