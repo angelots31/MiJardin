@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Pencil, Plus, Package, Wrench, ShoppingBag } from 'lucide-react';
+import { Trash2, Pencil, Plus, LayoutDashboard, Package, Wrench, ShoppingBag } from 'lucide-react';
 import { API_URL } from '../api/config';
 import PedidosPanel from '../components/PedidosPanel';
 
 const NAV_ITEMS = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'productos', label: 'Productos', icon: Package },
   { id: 'servicios', label: 'Servicios', icon: Wrench },
   { id: 'pedidos', label: 'Pedidos', icon: ShoppingBag },
@@ -16,11 +17,16 @@ const emptyItemForm = { nombre: '', descripcion: '', precio: '' };
 function PanelEmpleado() {
   const navigate = useNavigate();
   const token = localStorage.getItem('mijardin_token');
-  const nombre = localStorage.getItem('mijardin_user_name') || '';
+  const userName = (localStorage.getItem('mijardin_user_name') || '').split(/\s+/)[0];
+  const hora = new Date().getHours();
+  const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
   const authHeaders = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
-  const [tab, setTab] = useState('productos');
+  const [tab, setTab] = useState('dashboard');
   const [error, setError] = useState('');
+
+  // --- Pedidos (para resumen) ---
+  const [pedidos, setPedidos] = useState([]);
 
   // --- Productos ---
   const [productos, setProductos] = useState([]);
@@ -51,7 +57,15 @@ function PanelEmpleado() {
     } catch (err) { setError(err.message); }
   };
 
-  useEffect(() => { fetchProductos(); fetchServicios(); }, []);
+  const fetchPedidos = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/v1/pedidos`, { headers: authHeaders });
+      const data = await res.json();
+      if (data.success) setPedidos(data.data || []);
+    } catch (err) { setError(err.message); }
+  };
+
+  useEffect(() => { fetchProductos(); fetchServicios(); fetchPedidos(); }, []);
 
   // --- Productos CRUD ---
   const createProduct = async (e) => {
@@ -136,14 +150,14 @@ function PanelEmpleado() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FAF3E7] px-4 py-8 sm:px-8">
-      <div className="mx-auto flex max-w-6xl flex-col gap-5 md:flex-row">
+    <main className="min-h-screen bg-[#FAF3E7]">
+      <div className="flex flex-col md:flex-row md:items-start">
         {/* === SIDEBAR === */}
-        <aside className="w-full shrink-0 rounded-3xl bg-[#FAF3E7] p-3 shadow-xl ring-1 ring-[#23392E]/10 md:w-56">
+        <aside className="shrink-0 border-b border-[#23392E]/10 bg-[#FAF3E7] p-3 md:sticky md:top-0 md:h-screen md:w-60 md:border-b-0 md:border-r">
           <div className="mb-2 px-3 pt-2">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#D9714E]">Panel de</p>
             <h1 className="text-xl font-bold text-[#23392E]">Empleado</h1>
-            <p className="mt-1 text-xs text-[#3d3d35]">Hola, {nombre}</p>
+            <p className="mt-1 text-xs text-[#3d3d35]">Hola, {userName}</p>
           </div>
           <nav className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
             {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
@@ -164,7 +178,7 @@ function PanelEmpleado() {
         </aside>
 
         {/* === CONTENIDO === */}
-        <div className="flex-1 rounded-3xl bg-white p-6 shadow-xl ring-1 ring-[#23392E]/10 sm:p-8">
+        <div className="min-h-screen flex-1 rounded-3xl bg-white p-6 shadow-xl ring-1 ring-[#23392E]/10 sm:p-8">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-2xl font-bold text-[#23392E]">
               {NAV_ITEMS.find((n) => n.id === tab)?.label}
@@ -177,6 +191,33 @@ function PanelEmpleado() {
           </div>
 
           {error && <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+
+          {/* === DASHBOARD === */}
+          {tab === 'dashboard' && (
+            <>
+              <div className="mb-6 rounded-3xl bg-[#23392E] p-7 text-white">
+                <h3 className="text-2xl font-bold sm:text-3xl">{saludo}, {userName} 👋</h3>
+                <p className="mt-1 text-sm text-white/80">Bienvenido a tu espacio de trabajo en MiJardín. Aquí tienes el resumen general.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { label: 'Productos', value: productos.length, click: () => setTab('productos') },
+                  { label: 'Servicios', value: servicios.length, click: () => setTab('servicios') },
+                  { label: 'Pedidos', value: pedidos.length, click: () => setTab('pedidos') },
+                  { label: 'Pedidos pendientes', value: pedidos.filter((p) => p.estado === 'Pendiente').length, click: () => setTab('pedidos') },
+                ].map((card) => (
+                  <button
+                    key={card.label}
+                    onClick={card.click}
+                    className="cursor-pointer rounded-2xl bg-[#FAF3E7] p-5 text-left ring-1 ring-[#23392E]/10 transition-colors hover:bg-[#F1E7D6]"
+                  >
+                    <p className="text-xs font-bold uppercase tracking-wide text-[#7C9473]">{card.label}</p>
+                    <p className="mt-2 text-3xl font-bold text-[#23392E]">{card.value}</p>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
           {/* === TABLA PRODUCTOS === */}
           {tab === 'productos' && (

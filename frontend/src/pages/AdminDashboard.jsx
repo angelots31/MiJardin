@@ -19,6 +19,9 @@ const NAV_ITEMS = [
 function AdminDashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem('mijardin_token');
+  const userName = (localStorage.getItem('mijardin_user_name') || '').split(/\s+/)[0];
+  const hora = new Date().getHours();
+  const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
   const [tab, setTab] = useState('dashboard');
 
   // --- Usuarios ---
@@ -208,10 +211,10 @@ function AdminDashboard() {
   const cuentasActivas = users.filter((u) => u.estado === 'activo').length;
 
   return (
-    <main className="min-h-[calc(100vh-74px)] bg-[#FAF3E7] px-4 py-8 sm:px-8">
-      <div className="mx-auto flex max-w-6xl flex-col gap-5 md:flex-row">
+    <main className="min-h-screen bg-[#FAF3E7]">
+      <div className="flex flex-col md:flex-row md:items-start">
         {/* === SIDEBAR === */}
-        <aside className="w-full shrink-0 rounded-3xl bg-[#FAF3E7] p-3 shadow-xl ring-1 ring-[#23392E]/10 md:w-56">
+        <aside className="shrink-0 border-b border-[#23392E]/10 bg-[#FAF3E7] p-3 md:sticky md:top-0 md:h-screen md:w-60 md:border-b-0 md:border-r">
           <div className="mb-2 px-3 pt-2">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#D9714E]">Panel de</p>
             <h1 className="text-xl font-bold text-[#23392E]">Administración</h1>
@@ -235,7 +238,7 @@ function AdminDashboard() {
         </aside>
 
         {/* === CONTENIDO === */}
-        <div className="flex-1 rounded-3xl bg-white p-6 shadow-xl ring-1 ring-[#23392E]/10 sm:p-8">
+        <div className="min-h-screen flex-1 rounded-3xl bg-white p-6 shadow-xl ring-1 ring-[#23392E]/10 sm:p-8">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-2xl font-bold text-[#23392E]">
               {NAV_ITEMS.find((n) => n.id === tab)?.label}
@@ -251,6 +254,14 @@ function AdminDashboard() {
           {error && <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
           {tab === 'pedidos' && <PedidosPanel />}
+
+          {/* === BIENVENIDA === */}
+          {tab === 'dashboard' && (
+            <div className="mb-6 rounded-3xl bg-[#23392E] p-7 text-white">
+              <h3 className="text-2xl font-bold sm:text-3xl">{saludo}, {userName} 👋</h3>
+              <p className="mt-1 text-sm text-white/80">Bienvenido al panel de administración de MiJardín. Aquí tienes el resumen general.</p>
+            </div>
+          )}
 
           {/* === DASHBOARD === */}
           {tab === 'dashboard' && (
