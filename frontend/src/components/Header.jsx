@@ -71,6 +71,16 @@ function Header() {
                     Mis pedidos
                   </NavLink>
                 )}
+                {userRole === '2' && (
+                  <NavLink to="/mis-compras" onClick={() => setMenuAbierto(false)} className="header-user-dropdown-item">
+                    Mis compras y facturas
+                  </NavLink>
+                )}
+                {userRole === '2' && (
+                  <NavLink to="/mis-pqr" onClick={() => setMenuAbierto(false)} className="header-user-dropdown-item">
+                    Mis solicitudes (PQR)
+                  </NavLink>
+                )}
                 {tienePanel && (
                   <NavLink to={rutaPanel} onClick={() => setMenuAbierto(false)} className="header-user-dropdown-item">
                     Mi panel

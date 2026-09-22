@@ -5,3 +5,7 @@ passlib[bcrypt]
 python-dotenv
 pydantic[email]
 PyJWT
+httpx
+reportlab
+openpyxl
+bcrypt==4.0.1

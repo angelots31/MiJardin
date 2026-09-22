@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Pencil, Plus, LayoutDashboard, Users, Package, Wrench, ShoppingBag } from 'lucide-react';
+import { Trash2, Pencil, Plus, LayoutDashboard, Users, Package, Wrench, ShoppingBag, BadgeDollarSign, Receipt, MessageCircleQuestion } from 'lucide-react';
 import { API_URL } from '../api/config';
 import PedidosPanel from '../components/PedidosPanel';
+import DashboardResumen from '../components/dashboard/DashboardResumen';
+import VentasPanel from '../components/VentasPanel';
+import FacturasPanel from '../components/FacturasPanel';
+import PqrPanel from '../components/PqrPanel';
 
 const ROLES = { 1: 'Administrador', 2: 'Cliente', 4: 'Empleado' };
 const emptyUserForm = { nombres: '', apellidos: '', tipo_documento: 'CC', numero_documento: '', direccion: '', telefono: '', email: '', password: '', rol_id: 4 };
@@ -14,6 +18,9 @@ const NAV_ITEMS = [
   { id: 'productos', label: 'Productos', icon: Package },
   { id: 'servicios', label: 'Servicios', icon: Wrench },
   { id: 'pedidos', label: 'Pedidos', icon: ShoppingBag },
+  { id: 'ventas', label: 'Ventas', icon: BadgeDollarSign },
+  { id: 'facturas', label: 'Facturas', icon: Receipt },
+  { id: 'pqr', label: 'PQR', icon: MessageCircleQuestion },
 ];
 
 function AdminDashboard() {
@@ -254,6 +261,9 @@ function AdminDashboard() {
           {error && <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
           {tab === 'pedidos' && <PedidosPanel />}
+          {tab === 'ventas' && <VentasPanel />}
+          {tab === 'facturas' && <FacturasPanel />}
+          {tab === 'pqr' && <PqrPanel />}
 
           {/* === BIENVENIDA === */}
           {tab === 'dashboard' && (
@@ -264,25 +274,7 @@ function AdminDashboard() {
           )}
 
           {/* === DASHBOARD === */}
-          {tab === 'dashboard' && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { label: 'Cuentas totales', value: users.length, click: () => setTab('usuarios') },
-                { label: 'Cuentas activas', value: cuentasActivas, click: () => setTab('usuarios') },
-                { label: 'Productos', value: productos.length, click: () => setTab('productos') },
-                { label: 'Servicios', value: servicios.length, click: () => setTab('servicios') },
-              ].map((card) => (
-                <button
-                  key={card.label}
-                  onClick={card.click}
-                  className="cursor-pointer rounded-2xl bg-[#FAF3E7] p-5 text-left ring-1 ring-[#23392E]/10 transition-colors hover:bg-[#F1E7D6]"
-                >
-                  <p className="text-xs font-bold uppercase tracking-wide text-[#7C9473]">{card.label}</p>
-                  <p className="mt-2 text-3xl font-bold text-[#23392E]">{card.value}</p>
-                </button>
-              ))}
-            </div>
-          )}
+          {tab === 'dashboard' && <DashboardResumen rol="Administrador" />}
 
           {/* === TABLA USUARIOS === */}
           {tab === 'usuarios' && (
