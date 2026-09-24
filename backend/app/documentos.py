@@ -10,6 +10,7 @@ Los documentos se arman en memoria (BytesIO) y se devuelven como bytes,
 así que el servidor no necesita escribir nada en disco.
 """
 
+import math
 from datetime import datetime
 from io import BytesIO
 
@@ -21,6 +22,7 @@ from reportlab.lib.enums import TA_CENTER, TA_RIGHT
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
+from reportlab.graphics.shapes import Circle, Drawing, Ellipse
 from reportlab.platypus import (
     Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle,
 )
@@ -29,6 +31,7 @@ from reportlab.platypus import (
 VERDE = colors.HexColor("#23392E")
 TERRACOTA = colors.HexColor("#D9714E")
 SALVIA = colors.HexColor("#7C9473")
+MOSTAZA = colors.HexColor("#E8AC4F")
 CREMA = colors.HexColor("#FAF3E7")
 GRIS = colors.HexColor("#E4DCCD")
 
@@ -62,9 +65,66 @@ def _estilos():
     }
 
 
+def logo_dibujo(size: float = 13 * mm) -> Drawing:
+    """
+    Dibuja el logo de MiJardín (flor estilizada con hojas) usando primitivas
+    vectoriales de ReportLab.
+
+    Se dibuja en código a propósito: así el PDF no depende de archivos
+    externos ni de librerías extra como svglib, y sale igual de nítido a
+    cualquier tamaño.
+    """
+    dibujo = Drawing(size, size)
+    centro = size / 2.0
+
+    # Dos hojas salvia bajo la flor
+    for signo in (-1, 1):
+        hoja = Ellipse(
+            centro + signo * size * 0.19,
+            centro - size * 0.35,
+            size * 0.15,
+            size * 0.075,
+        )
+        hoja.fillColor = SALVIA
+        hoja.strokeColor = None
+        dibujo.add(hoja)
+
+    # Cinco pétalos terracota alrededor del centro
+    for indice in range(5):
+        angulo = math.radians(indice * 72)
+        petalo = Ellipse(
+            centro + math.sin(angulo) * size * 0.22,
+            centro + math.cos(angulo) * size * 0.22,
+            size * 0.15,
+            size * 0.13,
+        )
+        petalo.fillColor = TERRACOTA
+        petalo.strokeColor = None
+        dibujo.add(petalo)
+
+    # Centro mostaza
+    nucleo = Circle(centro, centro, size * 0.14)
+    nucleo.fillColor = MOSTAZA
+    nucleo.strokeColor = None
+    dibujo.add(nucleo)
+
+    return dibujo
+
+
 def _encabezado(story, estilos, titulo: str, subtitulo: str):
-    story.append(Paragraph(titulo, estilos["titulo"]))
-    story.append(Paragraph(f"{EMPRESA} · {NIT}<br/>{subtitulo}", estilos["marca"]))
+    """Encabezado con el logo a la izquierda y el título del documento."""
+    texto = [
+        Paragraph(titulo, estilos["titulo"]),
+        Paragraph(f"{EMPRESA} · {NIT}<br/>{subtitulo}", estilos["marca"]),
+    ]
+    encabezado = Table([[logo_dibujo(), texto]], colWidths=[16 * mm, None])
+    encabezado.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (0, 0), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+    ]))
+    story.append(encabezado)
 
 
 def _pie_generacion(story, estilos, usuario: str = ""):

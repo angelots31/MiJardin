@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import Logo from './Logo';
 import './Header.css';
 
 const RUTA_POR_ROL = { '1': '/admin', '4': '/empleado', '2': '/mi-cuenta' };
@@ -7,12 +8,13 @@ const RUTA_POR_ROL = { '1': '/admin', '4': '/empleado', '2': '/mi-cuenta' };
 function Header() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const esPanel = pathname === '/admin' || pathname === '/empleado';
+  // Los tres paneles tienen su propia cabecera y sidebar, así que ahí no
+  // mostramos la navegación pública.
+  const esPanel = ['/admin', '/empleado', '/mi-cuenta'].includes(pathname);
   const logged = localStorage.getItem('mijardin_logged') === 'true';
   const userName = (localStorage.getItem('mijardin_user_name') || 'Mi cuenta').split(/\s+/)[0];
   const userRole = localStorage.getItem('mijardin_user_role');
   const rutaPanel = RUTA_POR_ROL[userRole];
-  const tienePanel = userRole === '1' || userRole === '4';
 
   const [menuAbierto, setMenuAbierto] = useState(false);
   const menuRef = useRef(null);
@@ -36,16 +38,9 @@ function Header() {
 
   return (
     <header className="header flex items-center justify-between">
-      <div className="header-logo">
-        <svg width="30" height="30" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-          <circle cx="13" cy="7" r="4" fill="#D9714E" />
-          <circle cx="19" cy="13" r="4" fill="#E8AC4F" />
-          <circle cx="13" cy="19" r="4" fill="#7C9473" />
-          <circle cx="7" cy="13" r="4" fill="#F1E7D6" />
-          <circle cx="13" cy="13" r="3" fill="#FAF3E7" />
-        </svg>
-        MiJardín
-      </div>
+      <Link to="/" className="header-logo" aria-label="MiJardín, ir al inicio">
+        <Logo size={32} />
+      </Link>
       <nav className="header-nav">
         <NavLink to="/" end className={({ isActive }) => isActive ? 'activo' : ''}>Inicio</NavLink>
         <NavLink to="/quienes-somos" className={({ isActive }) => isActive ? 'activo' : ''}>¿Quiénes Somos?</NavLink>
@@ -66,24 +61,14 @@ function Header() {
             </button>
             {menuAbierto && (
               <div className="header-user-dropdown">
-                {userRole === '2' && (
-                  <NavLink to="/mis-pedidos" onClick={() => setMenuAbierto(false)} className="header-user-dropdown-item">
-                    Mis pedidos
-                  </NavLink>
-                )}
-                {userRole === '2' && (
-                  <NavLink to="/mis-compras" onClick={() => setMenuAbierto(false)} className="header-user-dropdown-item">
-                    Mis compras y facturas
-                  </NavLink>
-                )}
-                {userRole === '2' && (
-                  <NavLink to="/mis-pqr" onClick={() => setMenuAbierto(false)} className="header-user-dropdown-item">
-                    Mis solicitudes (PQR)
-                  </NavLink>
-                )}
-                {tienePanel && (
+                {rutaPanel && (
                   <NavLink to={rutaPanel} onClick={() => setMenuAbierto(false)} className="header-user-dropdown-item">
                     Mi panel
+                  </NavLink>
+                )}
+                {userRole === '2' && (
+                  <NavLink to="/tienda" onClick={() => setMenuAbierto(false)} className="header-user-dropdown-item">
+                    Ir a la tienda
                   </NavLink>
                 )}
                 <button type="button" onClick={handleLogout} className="header-user-dropdown-item header-user-dropdown-danger">

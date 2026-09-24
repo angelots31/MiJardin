@@ -1,0 +1,21 @@
+{
+  "id_pedido": 2,
+  "id_venta_pedido": 2,
+  "id_venta_manual": 3,
+  "id_factura_pedido": 2,
+  "id_factura_manual": 3,
+  "id_pqr": 1,
+  "id_conversacion": 4,
+  "productos": {
+    "Arreglo Primaveral Multicolor": 3,
+    "Orquídea Phalaenopsis Blanca": 4,
+    "Caja de Girasoles Radiantes": 5,
+    "Ramo Eterno de Rosas Rojas": 2,
+    "a": 1
+  },
+  "servicios": {
+    "Tarjeta y dedicatoria personalizada": 2,
+    "Decoración floral para eventos": 3,
+    "Domicilio exprés en la ciudad": 1
+  }
+}

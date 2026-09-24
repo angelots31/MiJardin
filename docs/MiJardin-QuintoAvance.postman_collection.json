@@ -7,7 +7,7 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:8000"
+      "value": "https://back-jardin.up.railway.app"
     },
     {
       "key": "token_admin",
@@ -23,11 +23,11 @@
     },
     {
       "key": "id_venta",
-      "value": "1"
+      "value": "2"
     },
     {
       "key": "id_factura",
-      "value": "1"
+      "value": "2"
     },
     {
       "key": "id_pqr",
@@ -35,7 +35,7 @@
     },
     {
       "key": "id_conversacion",
-      "value": "1"
+      "value": "4"
     }
   ],
   "item": [
@@ -67,7 +67,7 @@
             "description": "Guarda el token en la variable token_admin.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@mijardin.com\",\n  \"password\": \"Admin1234\"\n}"
+              "raw": "{\n  \"email\": \"angload@gmail.com\",\n  \"password\": \"anglo3131\"\n}"
             }
           },
           "event": [
@@ -109,7 +109,7 @@
             "description": "Guarda el token en la variable token_empleado.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"empleado@mijardin.com\",\n  \"password\": \"Admin1234\"\n}"
+              "raw": "{\n  \"email\": \"angloem@gmail.com\",\n  \"password\": \"anglo3131\"\n}"
             }
           },
           "event": [
@@ -151,7 +151,7 @@
             "description": "Guarda el token en la variable token_cliente.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"cliente@mijardin.com\",\n  \"password\": \"Admin1234\"\n}"
+              "raw": "{\n  \"email\": \"anglo@gmail.com\",\n  \"password\": \"anglo3131\"\n}"
             }
           },
           "event": [
@@ -203,7 +203,20 @@
               "mode": "raw",
               "raw": "{\n  \"id_cliente\": 3,\n  \"items\": [\n    {\n      \"tipo_item\": \"producto\",\n      \"id_producto\": 1,\n      \"cantidad\": 2,\n      \"descuento\": 0\n    },\n    {\n      \"tipo_item\": \"servicio\",\n      \"id_servicio\": 1,\n      \"cantidad\": 1\n    }\n  ],\n  \"descuento\": 0,\n  \"aplica_impuestos\": true,\n  \"metodo_pago\": \"Nequi\",\n  \"observaciones\": \"Venta de mostrador\"\n}"
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "if (datos.id_venta) pm.collectionVariables.set('id_venta', datos.id_venta);",
+                  "pm.test('Respuesta exitosa', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Convertir pedido en venta",
@@ -405,7 +418,20 @@
               "mode": "raw",
               "raw": "{\n  \"id_venta\": 1\n}"
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "if (datos.id_factura) pm.collectionVariables.set('id_factura', datos.id_factura);",
+                  "pm.test('Respuesta exitosa', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Consultar facturas",
@@ -724,7 +750,20 @@
               "mode": "raw",
               "raw": "{\n  \"tipo\": \"Reclamo\",\n  \"asunto\": \"El ramo llegó con una rosa marchita\",\n  \"descripcion\": \"Recibí el pedido hoy y una de las rosas venía en mal estado.\"\n}"
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "if (datos.id_pqr) pm.collectionVariables.set('id_pqr', datos.id_pqr);",
+                  "pm.test('Respuesta exitosa', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Mis PQR (Cliente)",
@@ -1080,7 +1119,20 @@
               "mode": "raw",
               "raw": "{\n  \"mensaje\": \"¿Hacen envíos a domicilio?\"\n}"
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "if (datos.id_conversacion) pm.collectionVariables.set('id_conversacion', datos.id_conversacion);",
+                  "pm.test('Respuesta exitosa', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Continuar conversación",

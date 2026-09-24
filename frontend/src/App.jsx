@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
@@ -12,9 +12,6 @@ import Tienda from './pages/Tienda';
 import AdminDashboard from './pages/AdminDashboard';
 import PanelEmpleado from './pages/PanelEmpleado';
 import PanelCliente from './pages/PanelCliente';
-import MisPedidos from './pages/MisPedidos';
-import MisCompras from './pages/MisCompras';
-import MisPqr from './pages/MisPqr';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -29,10 +26,12 @@ function App() {
         <Route path="/tienda" element={<Tienda />} />
         <Route path="/admin" element={<ProtectedRoute roles={['Administrador']}><AdminDashboard /></ProtectedRoute>} />
         <Route path="/empleado" element={<ProtectedRoute roles={['Empleado']}><PanelEmpleado /></ProtectedRoute>} />
+        {/* Todo el panel del cliente vive en una sola página con sidebar. */}
         <Route path="/mi-cuenta" element={<ProtectedRoute roles={['Cliente']}><PanelCliente /></ProtectedRoute>} />
-        <Route path="/mis-pedidos" element={<ProtectedRoute roles={['Cliente']}><MisPedidos /></ProtectedRoute>} />
-        <Route path="/mis-compras" element={<ProtectedRoute roles={['Cliente']}><MisCompras /></ProtectedRoute>} />
-        <Route path="/mis-pqr" element={<ProtectedRoute roles={['Cliente']}><MisPqr /></ProtectedRoute>} />
+        {/* Rutas anteriores: se conservan como redirecciones para no romper enlaces guardados. */}
+        <Route path="/mis-pedidos" element={<Navigate to="/mi-cuenta?seccion=pedidos" replace />} />
+        <Route path="/mis-compras" element={<Navigate to="/mi-cuenta?seccion=compras" replace />} />
+        <Route path="/mis-pqr" element={<Navigate to="/mi-cuenta?seccion=pqr" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

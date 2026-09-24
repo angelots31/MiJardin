@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Logo from '../components/Logo';
 import Input from '../components/auth/Input';
 import Button from '../components/auth/Button';
 import RegisterModal from '../components/auth/RegisterModal';
@@ -71,7 +72,12 @@ function Login() {
       localStorage.setItem('mijardin_user_role_nombre', usuario.rol_nombre);
       localStorage.setItem('mijardin_remember', remember ? 'true' : 'false');
 
-      const destination = returnTo.startsWith('/') ? returnTo : '/';
+      // Si nadie pidió una ruta concreta, llevamos a cada rol a su panel
+      // principal. Así el cliente cae directo en "Mi cuenta" y no en el inicio.
+      const panelPorRol = { 1: '/admin', 2: '/mi-cuenta', 4: '/empleado' };
+      const destination = returnTo.startsWith('/') && returnTo !== '/'
+        ? returnTo
+        : panelPorRol[usuario.rol_id] || '/';
       navigate(destination, { state: { loginSuccess: true, userName: usuario.nombres } });
     } catch (error) {
       setServerError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
@@ -104,8 +110,10 @@ function Login() {
         )}
 
         <div className="mb-7 text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#D9714E]">MiJardín</p>
-          <h1 className="mt-2 text-3xl font-bold text-[#23392E]">Iniciar sesión</h1>
+          <div className="mb-4 flex justify-center">
+            <Logo size={58} tono="oscuro" />
+          </div>
+          <h1 className="text-3xl font-bold text-[#23392E]">Iniciar sesión</h1>
           <p className="mt-2 text-sm text-[#4a4a3f]">Accede a tu cuenta para continuar.</p>
         </div>
 

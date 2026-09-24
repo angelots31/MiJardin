@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/*
+ * Tailwind v4 ya no carga tailwind.config.js automáticamente: hay que
+ * referenciarlo con @config. Sin esta línea, utilidades como
+ * `bg-jardin-verde` o `text-jardin-terracotaOscuro` no existían y los
+ * paneles se veían sin color.
+ */
+@config "../tailwind.config.js";
+
 :root {
   --header-alto: 74px;
   --verde-oscuro: #23392E;
@@ -33,6 +41,27 @@ h1, h2, h3 {
 
 main {
   min-height:100vh;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background-color: var(--terracota);
+  color: #fff;
+}
+
+/* Foco visible y consistente con la marca para navegación por teclado */
+:focus-visible {
+  outline: 2px solid var(--terracota);
+  outline-offset: 2px;
+}
+
+/* Scrollbar discreta en los paneles con desplazamiento interno */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 148, 115, 0.55) transparent;
 }
 
 .pagina {

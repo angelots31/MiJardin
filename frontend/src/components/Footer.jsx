@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Logo from './Logo';
 import './Footer.css';
 
 function Footer() {
@@ -8,12 +9,11 @@ function Footer() {
     <footer className="footer">
       <div className="footer-contenido">
         <div className="footer-marca-col">
-          <div className="footer-marca">MiJardín</div>
+          <Logo size={40} />
           <p className="footer-descripcion">
             Conectamos personas con flores, ramos y floristerías para que puedan crear
             momentos especiales desde casa.
           </p>
-          <div className="footer-flor">✿</div>
         </div>
 
         <div className="footer-columna">

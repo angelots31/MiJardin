@@ -1,0 +1,81 @@
+Button | Menu
+Button | Go back (Alt+Left arrow)
+Button | Go forward (Alt+Right arrow)
+Button | Invite
+Button | Upgrade
+Button | New notifications (1)
+Button | Manage accounts
+Button | Minimize
+Button | Maximize
+Button | Close
+TabItem | Items
+TabItem | Services
+TabItem | History
+TabItem | Local Files
+Edit | Input field
+Button | Collections
+TreeItem | Collapse MiJardín API - Pruebas Completas (v2)
+Button | Collapse
+TreeItem | Expand 🟢 0. RAÍZ
+Button | Expand
+TreeItem | Expand 🔵 1. AUTH - Registro
+Button | Expand
+TreeItem | Expand 🟡 2. AUTH - Login
+Button | Expand
+TreeItem | Expand 🟣 3. AUTH - /me
+Button | Expand
+TreeItem | Expand 🔴 4. ADMIN - Usuarios (CRUD)
+Button | Expand
+TreeItem | Expand 🟠 5. Productos (CRUD)
+Button | Expand
+TreeItem | Collapse ⚪ 6. Servicios (CRUD)
+Button | Collapse
+TreeItem | GET GET /servicios - Listar (público)
+TreeItem | POST POST /servicios - Crear (Admin)
+TreeItem | GET GET /servicios - Capturar id del creado
+TreeItem | PUT PUT /servicios/{id} - Editar (Empleado)
+TreeItem | DEL DELETE /servicios/{id} - Eliminar
+TreeItem | POST POST /servicios - Error: Cliente no puede crear
+TreeItem | Expand 🌸 7. Pedidos
+Button | Expand
+TreeItem | Expand My Collection
+Button | Expand
+Button | Environments
+Button | Documents
+Button | Specs
+Button | Mocks
+Button | Datasets
+Button | Flows
+Button | Create new request
+Button | Search tabs
+ComboBox | Environment No environment
+Button | Save
+Button | button
+Button | Share
+Button | Copy Link
+Edit | search
+Button | Open dropdown
+Button | Send
+TabItem | Docs
+TabItem | Params
+TabItem | Authorization
+TabItem | Headers
+TabItem | Body
+TabItem | Scripts
+TabItem | Settings
+Button | Cookies
+Button | JSON
+Button | Schema
+Button | button
+Edit | Editor content
+Button | History
+Button | Send + Get a successful response
+Button | Send + Visualize response
+Button | Send + Write tests
+Button | Terminal
+Button | Console
+Button | Send the request
+Button | Globals
+Button | Vault
+Button | Not now
+Button | Take the survey

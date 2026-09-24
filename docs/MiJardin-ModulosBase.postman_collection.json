@@ -1,0 +1,1200 @@
+{
+  "info": {
+    "name": "MiJardín · Módulos Base",
+    "description": "Pruebas de los módulos base: autenticación (registro/login), administración de usuarios, catálogo (productos y servicios) y pedidos.\n\nComplementa la colección 'MiJardín · Quinto Avance' (ventas, facturas, reportes, PQR, estadísticas y chatbot).\n\nAntes de empezar: ejecuta las 3 peticiones de login de la carpeta '0. Autenticación' para llenar las variables token_admin, token_empleado y token_cliente.\n\nFlujo recomendado: crea primero el registro/usuario de prueba, luego usa 'Listar' para que las variables id_usuario / id_producto / id_servicio se llenen automáticamente antes de actualizar o eliminar.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://back-jardin.up.railway.app"
+    },
+    {
+      "key": "token_admin",
+      "value": ""
+    },
+    {
+      "key": "token_empleado",
+      "value": ""
+    },
+    {
+      "key": "token_cliente",
+      "value": ""
+    },
+    {
+      "key": "id_usuario",
+      "value": ""
+    },
+    {
+      "key": "id_producto",
+      "value": "1"
+    },
+    {
+      "key": "id_servicio",
+      "value": "1"
+    },
+    {
+      "key": "id_pedido",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Autenticación",
+      "item": [
+        {
+          "name": "Registro de cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registra un cliente nuevo (rol Cliente). Si el correo ya existe responde 409: cambia el email y el numero_documento para repetir la prueba.\nValidaciones del backend: nombres/apellidos (2-40, solo letras), documento (6-12 dígitos), teléfono (7-10 dígitos) y contraseña (9-20 caracteres con letras y números).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Laura\",\n  \"apellidos\": \"Prueba\",\n  \"tipo_documento\": \"CC\",\n  \"numero_documento\": \"1023456789\",\n  \"direccion\": \"Calle 123 #45-67\",\n  \"telefono\": \"3105551234\",\n  \"email\": \"prueba.laura@example.com\",\n  \"password\": \"Prueba2026ok\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Registro exitoso (o correo ya registrado)\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Administrador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Guarda el token en la variable token_admin.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"angload@gmail.com\",\n  \"password\": \"anglo3131\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "if (datos.token) pm.collectionVariables.set(\"token_admin\", datos.token);",
+                  "pm.test(\"Login correcto\", () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Empleado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Guarda el token en la variable token_empleado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"angloem@gmail.com\",\n  \"password\": \"anglo3131\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "if (datos.token) pm.collectionVariables.set(\"token_empleado\", datos.token);",
+                  "pm.test(\"Login correcto\", () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Guarda el token en la variable token_cliente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"anglo@gmail.com\",\n  \"password\": \"anglo3131\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "if (datos.token) pm.collectionVariables.set(\"token_cliente\", datos.token);",
+                  "pm.test(\"Login correcto\", () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validar token (/auth/me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Devuelve el usuario del token. Cambia la cabecera por token_empleado o token_cliente para validar los otros roles."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test(\"Token válido\", () => pm.expect(datos.success).to.be.true);",
+                  "pm.test(\"Devuelve el rol del usuario\", () => pm.expect(datos.usuario).to.have.property(\"rol_nombre\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1. Usuarios (Admin)",
+      "item": [
+        {
+          "name": "Crear usuario (Empleado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ]
+            },
+            "description": "Solo Administrador. rol_id: 1 Administrador, 2 Cliente, 4 Empleado. Si el correo ya existe responde 409.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Empleado\",\n  \"apellidos\": \"Prueba\",\n  \"tipo_documento\": \"CC\",\n  \"numero_documento\": \"1098765432\",\n  \"direccion\": \"Carrera 45 #12-34\",\n  \"telefono\": \"3205556789\",\n  \"email\": \"empleado.prueba@example.com\",\n  \"password\": \"Empleado2026\",\n  \"rol_id\": 4\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Usuario creado (o correo ya registrado)\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ]
+            },
+            "description": "Solo Administrador. La prueba guarda en id_usuario el último usuario de la lista (el más reciente). Ajusta la variable manualmente si quieres probar sobre otro."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test(\"Lista de usuarios recibida\", () => pm.expect(datos.success).to.be.true);",
+                  "const lista = datos.data || [];",
+                  "if (lista.length) pm.collectionVariables.set(\"id_usuario\", lista[lista.length - 1].id_usuario);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/users/{{id_usuario}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{id_usuario}}"
+              ]
+            },
+            "description": "Actualiza nombres, apellidos y estado del usuario.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Laura\",\n  \"apellidos\": \"Prueba Editada\",\n  \"estado\": \"activo\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test(\"Usuario actualizado\", () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cambiar estado de usuario",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/users/{{id_usuario}}/estado",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{id_usuario}}",
+                "estado"
+              ]
+            },
+            "description": "Marca al usuario como 'inactivo' (o 'activo'). Un usuario inactivo no puede iniciar sesión (403 en el login).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"inactivo\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test(\"Estado cambiado\", () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/users/{{id_usuario}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{id_usuario}}"
+              ]
+            },
+            "description": "Elimina el usuario de prueba. Ejecútalo al final del flujo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test(\"Usuario eliminado\", () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Productos",
+      "item": [
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos"
+              ]
+            },
+            "description": "Roles permitidos: Administrador y Empleado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Producto creado\", () => pm.expect(pm.response.code).to.eql(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar catálogo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos"
+              ]
+            },
+            "description": "Endpoint público. La prueba guarda en id_producto el producto más reciente (la lista viene ordenada por fecha de creación descendente)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test(\"Catálogo recibido\", () => pm.expect(datos.success).to.be.true);",
+                  "const lista = datos.data || [];",
+                  "if (lista.length) pm.collectionVariables.set(\"id_producto\", lista[0].id_producto);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_empleado}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos/{{id_producto}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos",
+                "{{id_producto}}"
+              ]
+            },
+            "description": "Roles permitidos: Administrador y Empleado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ramo de prueba editado\",\n  \"descripcion\": \"Producto actualizado desde Postman\",\n  \"precio\": 38000,\n  \"imagen\": \"\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test(\"Producto actualizado\", () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos/{{id_producto}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos",
+                "{{id_producto}}"
+              ]
+            },
+            "description": "Elimina el producto de prueba."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test(\"Producto eliminado\", () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Servicios",
+      "item": [
+        {
+          "name": "Crear servicio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_empleado}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/servicios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "servicios"
+              ]
+            },
+            "description": "Roles permitidos: Administrador y Empleado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Servicio creado\", () => pm.expect(pm.response.code).to.eql(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar servicios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/servicios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "servicios"
+              ]
+            },
+            "description": "Endpoint público. La prueba guarda en id_servicio el servicio más reciente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test('Servicios recibidos', () => pm.expect(datos.success).to.be.true);",
+                  "const lista = datos.data || [];",
+                  "if (lista.length) pm.collectionVariables.set('id_servicio', lista[0].id_servicio);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar servicio",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/servicios/{{id_servicio}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "servicios",
+                "{{id_servicio}}"
+              ]
+            },
+            "description": "Roles permitidos: Administrador y Empleado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Servicio de prueba editado\",\n  \"descripcion\": \"Servicio actualizado desde Postman\",\n  \"precio\": 55000,\n  \"imagen\": \"\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test('Servicio actualizado', () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar servicio",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/servicios/{{id_servicio}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "servicios",
+                "{{id_servicio}}"
+              ]
+            },
+            "description": "Elimina el servicio de prueba."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test('Servicio eliminado', () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Pedidos",
+      "item": [
+        {
+          "name": "Crear pedido (Cliente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pedidos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos"
+              ]
+            },
+            "description": "Solo rol Cliente. Si el item lleva id_producto, el servidor sobrescribe nombre y precio con los del catálogo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"id_producto\": 1,\n      \"nombre_producto\": \"Ramo de rosas\",\n      \"cantidad\": 2,\n      \"precio\": 0\n    },\n    {\n      \"id_producto\": 2,\n      \"nombre_producto\": \"Buqué mixto\",\n      \"cantidad\": 1,\n      \"precio\": 0\n    }\n  ],\n  \"observaciones\": \"Pedido de prueba desde Postman\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "if (datos.id_pedido) pm.collectionVariables.set(\"id_pedido\", datos.id_pedido);",
+                  "pm.test(\"Pedido creado\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mis pedidos (Cliente)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pedidos/mis-pedidos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos",
+                "mis-pedidos"
+              ]
+            },
+            "description": "Devuelve solo los pedidos del cliente del token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test('Mis pedidos recibidos', () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Todos los pedidos (Empleado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_empleado}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pedidos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos"
+              ]
+            },
+            "description": "Roles permitidos: Administrador y Empleado. Incluye los datos de contacto del cliente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test('Pedidos recibidos', () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Detalle del pedido",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pedidos/{{id_pedido}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos",
+                "{{id_pedido}}"
+              ]
+            },
+            "description": "Accesible para cualquier rol autenticado; el cliente solo puede ver sus propios pedidos (403 en otro caso)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test('Detalle del pedido recibido', () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar pedido (Empleado)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_empleado}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/pedidos/{{id_pedido}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedidos",
+                "{{id_pedido}}"
+              ]
+            },
+            "description": "Roles permitidos: Administrador y Empleado. Estados válidos: Pendiente, En revisión, Modificado, Confirmado, En preparación, En camino, Entregado, Cancelado. También acepta 'items' para reemplazar el detalle (en ese caso el estado pasa a 'Modificado' si no se envía).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"Confirmado\",\n  \"observaciones\": \"Confirmado desde Postman\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json();",
+                  "pm.test('Pedido actualizado', () => pm.expect(datos.success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Casos negativos",
+      "item": [
+        {
+          "name": "Login con contraseña incorrecta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Debe responder 401 con 'Credenciales inválidas.'",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"anglo@gmail.com\",\n  \"password\": \"contrasena_errada\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Rechaza credenciales inválidas con 401\", () => pm.expect(pm.response.code).to.eql(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registro con contraseña inválida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "La contraseña no cumple la política (mínimo 9 caracteres con letras y números). Debe responder 422.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Ana\",\n  \"apellidos\": \"Inválida\",\n  \"tipo_documento\": \"CC\",\n  \"numero_documento\": \"1023456788\",\n  \"direccion\": \"Calle 98 #76-54\",\n  \"telefono\": \"3105550000\",\n  \"email\": \"invalida@example.com\",\n  \"password\": \"123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Rechaza contraseña inválida con 422\", () => pm.expect(pm.response.code).to.eql(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear producto sin token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "productos"
+              ]
+            },
+            "description": "Sin cabecera Authorization. Debe responder 401 (no autenticado).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Producto sin token\",\n  \"descripcion\": \"No debería crearse\",\n  \"precio\": 1000,\n  \"imagen\": \"\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Rechaza petición sin token con 401\", () => pm.expect(pm.response.code).to.be.oneOf([401, 403]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar usuarios como Cliente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_cliente}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ]
+            },
+            "description": "Un Cliente no puede administrar usuarios. Debe responder 403 (prohibido)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Rechaza acceso de Cliente con 403\", () => pm.expect(pm.response.code).to.eql(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
