@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Pencil, Plus, LayoutDashboard, Package, Wrench, ShoppingBag, Clock, Home, LogOut } from 'lucide-react';
+import { Trash2, Pencil, Plus, LayoutDashboard, Package, Wrench, ShoppingBag, Clock, Home, LogOut, Store } from 'lucide-react';
 import { API_URL } from '../api/config';
 import Logo from '../components/Logo';
 import PedidosPanel from '../components/PedidosPanel';
+import DashboardResumen from '../components/dashboard/DashboardResumen';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, descripcion: 'El resumen general de tu trabajo en MiJardín.' },
@@ -197,6 +198,12 @@ function PanelEmpleado() {
 
           <div className="mt-4 hidden space-y-2 border-t border-jardin-borde pt-4 md:block">
             <Link
+              to="/tienda"
+              className="flex items-center gap-2 rounded-xl bg-jardin-terracota px-3 py-2.5 text-sm font-bold text-white hover:bg-jardin-terracotaOscuro"
+            >
+              <Store size={17} /> Ir a la tienda
+            </Link>
+            <Link
               to="/"
               className="flex items-center gap-2 rounded-xl bg-jardin-crema px-3 py-2.5 text-sm font-semibold text-jardin-verde hover:bg-jardin-borde"
             >
@@ -229,6 +236,7 @@ function PanelEmpleado() {
               <div className="flex gap-2">
                 {tab === 'productos' && <button onClick={() => setCreatingProduct(true)} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar producto</button>}
                 {tab === 'servicios' && <button onClick={() => setCreatingServicio(true)} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar servicio</button>}
+                <Link to="/tienda" className="rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white md:hidden">Tienda</Link>
                 <button onClick={() => navigate('/')} className="cursor-pointer rounded-full bg-jardin-crema px-4 py-2 text-sm font-semibold text-jardin-verde md:hidden">Inicio</button>
                 <button onClick={cerrarSesion} className="cursor-pointer rounded-full bg-jardin-crema px-4 py-2 text-sm font-semibold text-[#B3431E] md:hidden">Salir</button>
               </div>
@@ -267,6 +275,9 @@ function PanelEmpleado() {
                   </button>
                 ))}
               </div>
+
+              {/* === ESTADÍSTICAS Y GRÁFICOS === */}
+              <DashboardResumen rol="Empleado" />
             </div>
           )}
 

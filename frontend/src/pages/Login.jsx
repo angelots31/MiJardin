@@ -72,12 +72,9 @@ function Login() {
       localStorage.setItem('mijardin_user_role_nombre', usuario.rol_nombre);
       localStorage.setItem('mijardin_remember', remember ? 'true' : 'false');
 
-      // Si nadie pidió una ruta concreta, llevamos a cada rol a su destino:
-      // admin y empleado a su panel y el cliente directo a la tienda.
-      const panelPorRol = { 1: '/admin', 2: '/tienda', 4: '/empleado' };
-      const destination = returnTo.startsWith('/') && returnTo !== '/'
-        ? returnTo
-        : panelPorRol[usuario.rol_id] || '/';
+      // Si nadie pidió una ruta concreta, tras iniciar sesión siempre volvemos
+      // al inicio; cada rol entra a su panel desde el menú del encabezado.
+      const destination = returnTo.startsWith('/') && returnTo !== '/' ? returnTo : '/';
       navigate(destination, { state: { loginSuccess: true, userName: usuario.nombres } });
     } catch (error) {
       setServerError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
