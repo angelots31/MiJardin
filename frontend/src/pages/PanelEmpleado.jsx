@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Pencil, Plus, LayoutDashboard, Package, Wrench, ShoppingBag, BadgeDollarSign, Receipt, MessageCircleQuestion, Clock, Home, LogOut, Store } from 'lucide-react';
+import { Trash2, Pencil, Plus, LayoutDashboard, Package, Wrench, ShoppingBag, BadgeDollarSign, Receipt, MessageCircleQuestion, Home, LogOut, Store } from 'lucide-react';
 import { API_URL } from '../api/config';
 import Logo from '../components/Logo';
 import PedidosPanel from '../components/PedidosPanel';
@@ -44,9 +44,6 @@ function PanelEmpleado() {
   const [tab, setTab] = useState('dashboard');
   const [error, setError] = useState('');
 
-  // --- Pedidos (para resumen) ---
-  const [pedidos, setPedidos] = useState([]);
-
   // --- Productos ---
   const [productos, setProductos] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -76,15 +73,7 @@ function PanelEmpleado() {
     } catch (err) { setError(err.message); }
   };
 
-  const fetchPedidos = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/v1/pedidos`, { headers: authHeaders });
-      const data = await res.json();
-      if (data.success) setPedidos(data.data || []);
-    } catch (err) { setError(err.message); }
-  };
-
-  useEffect(() => { fetchProductos(); fetchServicios(); fetchPedidos(); }, []);
+  useEffect(() => { fetchProductos(); fetchServicios(); }, []);
 
   // --- Productos CRUD ---
   const createProduct = async (e) => {
@@ -256,30 +245,6 @@ function PanelEmpleado() {
               <div className="rounded-3xl bg-jardin-verde p-7 text-jardin-fondo">
                 <h3 className="text-2xl font-bold sm:text-3xl">{saludo}, {userName.split(/\s+/)[0]} 👋</h3>
                 <p className="mt-1 text-sm text-jardin-crema">Bienvenido a tu espacio de trabajo en MiJardín. Aquí tienes el resumen general.</p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {[
-                  { label: 'Productos', value: productos.length, icon: Package, barra: 'bg-jardin-verde', color: 'text-jardin-verde', click: () => setTab('productos') },
-                  { label: 'Servicios', value: servicios.length, icon: Wrench, barra: 'bg-jardin-salvia', color: 'text-[#5F7657]', click: () => setTab('servicios') },
-                  { label: 'Pedidos', value: pedidos.length, icon: ShoppingBag, barra: 'bg-jardin-mostaza', color: 'text-[#B57F24]', click: () => setTab('pedidos') },
-                  { label: 'Pedidos pendientes', value: pedidos.filter((p) => p.estado === 'Pendiente').length, icon: Clock, barra: 'bg-jardin-terracota', color: 'text-jardin-terracotaOscuro', click: () => setTab('pedidos') },
-                ].map(({ label, value, icon: Icon, barra, color, click }) => (
-                  <button
-                    key={label}
-                    onClick={click}
-                    className="group relative w-full cursor-pointer overflow-hidden rounded-xl border border-jardin-borde bg-white p-4 text-left shadow-sm transition hover:shadow-md"
-                  >
-                    <span className={`absolute left-0 top-0 h-full w-1 ${barra}`} aria-hidden="true" />
-                    <div className="flex items-start justify-between gap-3 pl-2">
-                      <div className="min-w-0">
-                        <p className="text-sm text-[#6B7B70]">{label}</p>
-                        <p className={`mt-1 truncate text-2xl font-semibold ${color}`}>{value}</p>
-                      </div>
-                      <Icon size={22} className="shrink-0 text-jardin-salvia" aria-hidden="true" />
-                    </div>
-                  </button>
-                ))}
               </div>
 
               {/* === ESTADÍSTICAS Y GRÁFICOS === */}

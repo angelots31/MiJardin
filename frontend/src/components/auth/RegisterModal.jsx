@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Input from './Input';
 import Select from './Select';
 import Button from './Button';
-import { validateField, validateRegister } from './validation';
+import { validateField, validateRegister, progresoFormulario } from './validation';
 import { API_URL } from '../../api/config';
 
 const initialForm = {
@@ -20,6 +20,9 @@ function RegisterModal({ open, onClose, returnTo = '/', onRegistered }) {
   const navigate = useNavigate();
 
   if (!open) return null;
+
+  const { completados, total } = progresoFormulario(form);
+  const porcentaje = Math.round((completados / total) * 100);
 
   const handleClose = () => {
     setForm(initialForm);
@@ -89,8 +92,15 @@ function RegisterModal({ open, onClose, returnTo = '/', onRegistered }) {
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#D9714E]">MiJardín</p>
             <h2 id="registro-titulo" className="mt-1 text-2xl font-bold text-[#23392E]">Crear una cuenta</h2>
+            <p className="mt-1 text-xs font-semibold text-[#6B7B70]">
+              {completados} de {total} datos completados
+            </p>
           </div>
           <button type="button" onClick={onClose} aria-label="Cerrar" className="rounded-full px-3 py-1 text-2xl text-[#23392E] hover:bg-[#F1E7D6]">×</button>
+        </div>
+
+        <div className="mb-5 h-2 overflow-hidden rounded-full bg-[#E4DCCD]" role="progressbar" aria-valuenow={completados} aria-valuemin={0} aria-valuemax={total} aria-label="Datos completados">
+          <div className="h-full rounded-full bg-[#23392E] transition-all duration-300" style={{ width: `${porcentaje}%` }} />
         </div>
 
         {submitted && Object.keys(errors).length > 0 && (

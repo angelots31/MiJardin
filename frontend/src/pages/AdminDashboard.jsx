@@ -8,10 +8,20 @@ import DashboardResumen from '../components/dashboard/DashboardResumen';
 import VentasPanel from '../components/VentasPanel';
 import FacturasPanel from '../components/FacturasPanel';
 import PqrPanel from '../components/PqrPanel';
+import { validateField, validateRegister, progresoFormulario } from '../components/auth/validation';
 
 const ROLES = { 1: 'Administrador', 2: 'Cliente', 4: 'Empleado' };
 const emptyUserForm = { nombres: '', apellidos: '', tipo_documento: 'CC', numero_documento: '', direccion: '', telefono: '', email: '', password: '', rol_id: 4 };
 const emptyItemForm = { nombre: '', descripcion: '', precio: '' };
+
+function Campo({ error, className = '', children }) {
+  return (
+    <div className={className}>
+      {children}
+      {error && <span className="mt-1 block text-xs font-medium text-red-600">{error}</span>}
+    </div>
+  );
+}
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, descripcion: 'El resumen general de MiJardín: ventas, pedidos, facturas y más.' },
@@ -49,6 +59,7 @@ function AdminDashboard() {
   const [editingUser, setEditingUser] = useState(null);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState(emptyUserForm);
+  const [formErrors, setFormErrors] = useState({});
 
   // --- Productos ---
   const [productos, setProductos] = useState([]);
@@ -131,8 +142,18 @@ function AdminDashboard() {
     } catch (err) { setError(err.message); }
   };
 
+  const handleChangeForm = (e) => {
+    const { name, value } = e.target;
+    const siguiente = { ...form, [name]: name === 'rol_id' ? Number(value) : value };
+    setForm(siguiente);
+    setFormErrors((prev) => ({ ...prev, [name]: validateField(name, value, siguiente) }));
+  };
+
   const createUser = async (e) => {
     e.preventDefault();
+    const nextErrors = validateRegister(form);
+    setFormErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
     try {
       const res = await fetch(`${API_URL}/api/v1/admin/users`, {
         method: 'POST', headers: authHeaders, body: JSON.stringify(form),
@@ -141,6 +162,7 @@ function AdminDashboard() {
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       setCreating(false);
       setForm(emptyUserForm);
+      setFormErrors({});
       fetchUsers();
     } catch (err) { setError(err.message); }
   };
@@ -228,6 +250,10 @@ function AdminDashboard() {
   };
 
   const cuentasActivas = users.filter((u) => u.estado === 'activo').length;
+  const { completados, total } = progresoFormulario(form);
+  const porcentaje = Math.round((completados / total) * 100);
+  const inputCls = (campo) =>
+    `rounded-xl border ${formErrors[campo] ? 'border-red-500' : 'border-jardin-borde'} bg-jardin-fondo px-4 py-2.5 text-sm`;
 
   return (
     <main className="min-h-screen bg-jardin-fondo">
@@ -301,7 +327,7 @@ function AdminDashboard() {
                 </p>
               </div>
               <div className="flex gap-2">
-                {tab === 'usuarios' && <button onClick={() => setCreating(true)} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar usuario</button>}
+                {tab === 'usuarios' && <button onClick={() => { setFormErrors({}); setCreating(true); }} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar usuario</button>}
                 {tab === 'productos' && <button onClick={() => setCreatingProduct(true)} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar producto</button>}
                 {tab === 'servicios' && <button onClick={() => setCreatingServicio(true)} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar servicio</button>}
                 <Link to="/tienda" className="rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white md:hidden">Tienda</Link>
@@ -463,23 +489,57 @@ function AdminDashboard() {
       {/* === MODAL CREAR USUARIO === */}
       {creating && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-jardin-verdeOscuro/60 p-4 backdrop-blur-sm" onClick={() => setCreating(false)}>
-          <form onSubmit={createUser} onClick={(e) => e.stopPropagation()} className="grid w-full max-w-lg gap-3 rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-jardin-borde sm:grid-cols-2">
-            <h2 className="sm:col-span-2 text-xl font-bold text-jardin-verde">Agregar usuario</h2>
-            <input value={form.nombres} onChange={(e) => setForm((f) => ({ ...f, nombres: e.target.value }))} placeholder="Nombres" className="rounded-xl border border-jardin-borde bg-jardin-fondo px-4 py-2.5 text-sm" required />
-            <input value={form.apellidos} onChange={(e) => setForm((f) => ({ ...f, apellidos: e.target.value }))} placeholder="Apellidos" className="rounded-xl border border-jardin-borde bg-jardin-fondo px-4 py-2.5 text-sm" required />
-            <select value={form.tipo_documento} onChange={(e) => setForm((f) => ({ ...f, tipo_documento: e.target.value }))} className="rounded-xl border border-jardin-borde bg-jardin-fondo px-4 py-2.5 text-sm">
-              <option value="CC">Cédula de ciudadanía</option><option value="CE">Cédula de extranjería</option><option value="TI">Tarjeta de identidad</option><option value="Pasaporte">Pasaporte</option>
-            </select>
-            <input value={form.numero_documento} onChange={(e) => setForm((f) => ({ ...f, numero_documento: e.target.value }))} placeholder="Número de documento" className="rounded-xl border border-jardin-borde bg-jardin-fondo px-4 py-2.5 text-sm" required />
-            <input value={form.direccion} onChange={(e) => setForm((f) => ({ ...f, direccion: e.target.value }))} placeholder="Dirección" className="sm:col-span-2 rounded-xl border border-jardin-borde bg-jardin-fondo px-4 py-2.5 text-sm" required />
-            <input value={form.telefono} onChange={(e) => setForm((f) => ({ ...f, telefono: e.target.value }))} placeholder="Teléfono" className="rounded-xl border border-jardin-borde bg-jardin-fondo px-4 py-2.5 text-sm" required />
-            <input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="Correo electrónico" className="rounded-xl border border-jardin-borde bg-jardin-fondo px-4 py-2.5 text-sm" required />
-            <input type="password" value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} placeholder="Contraseña (mín. 9 caracteres)" className="rounded-xl border border-jardin-borde bg-jardin-fondo px-4 py-2.5 text-sm" required minLength={9} />
-            <select value={form.rol_id} onChange={(e) => setForm((f) => ({ ...f, rol_id: Number(e.target.value) }))} className="rounded-xl border border-jardin-borde bg-jardin-fondo px-4 py-2.5 text-sm">
-              <option value={4}>Empleado</option><option value={1}>Administrador</option><option value={2}>Cliente</option>
-            </select>
+          <form onSubmit={createUser} noValidate onClick={(e) => e.stopPropagation()} className="grid w-full max-w-lg gap-3 rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-jardin-borde sm:grid-cols-2">
+            <div className="flex items-center justify-between gap-3 sm:col-span-2">
+              <h2 className="text-xl font-bold text-jardin-verde">Agregar usuario</h2>
+              <span className="whitespace-nowrap rounded-full bg-jardin-fondo px-3 py-1 text-xs font-bold text-jardin-verde">
+                {completados} de {total} datos
+              </span>
+            </div>
+
+            <div className="h-2 overflow-hidden rounded-full bg-jardin-fondo sm:col-span-2" role="progressbar" aria-valuenow={completados} aria-valuemin={0} aria-valuemax={total} aria-label="Datos completados">
+              <div className="h-full rounded-full bg-jardin-verde transition-all duration-300" style={{ width: `${porcentaje}%` }} />
+            </div>
+
+            {Object.values(formErrors).some((mensaje) => mensaje) && (
+              <div className="rounded-xl border border-jardin-errorBorder bg-jardin-errorBg px-3 py-2 text-xs font-medium text-[#B3431E] sm:col-span-2">
+                Revisa los campos marcados antes de continuar.
+              </div>
+            )}
+
+            <Campo error={formErrors.nombres}>
+              <input name="nombres" value={form.nombres} onChange={handleChangeForm} placeholder="Nombres" className={inputCls('nombres')} />
+            </Campo>
+            <Campo error={formErrors.apellidos}>
+              <input name="apellidos" value={form.apellidos} onChange={handleChangeForm} placeholder="Apellidos" className={inputCls('apellidos')} />
+            </Campo>
+            <Campo error={formErrors.tipo_documento}>
+              <select name="tipo_documento" value={form.tipo_documento} onChange={handleChangeForm} className={inputCls('tipo_documento')}>
+                <option value="CC">Cédula de ciudadanía</option><option value="CE">Cédula de extranjería</option><option value="TI">Tarjeta de identidad</option><option value="Pasaporte">Pasaporte</option>
+              </select>
+            </Campo>
+            <Campo error={formErrors.numero_documento}>
+              <input name="numero_documento" value={form.numero_documento} onChange={handleChangeForm} placeholder="Número de documento" className={inputCls('numero_documento')} />
+            </Campo>
+            <Campo error={formErrors.direccion} className="sm:col-span-2">
+              <input name="direccion" value={form.direccion} onChange={handleChangeForm} placeholder="Dirección" className={inputCls('direccion')} />
+            </Campo>
+            <Campo error={formErrors.telefono}>
+              <input name="telefono" value={form.telefono} onChange={handleChangeForm} placeholder="Teléfono" className={inputCls('telefono')} />
+            </Campo>
+            <Campo error={formErrors.email}>
+              <input type="email" name="email" value={form.email} onChange={handleChangeForm} placeholder="Correo electrónico" className={inputCls('email')} />
+            </Campo>
+            <Campo error={formErrors.password}>
+              <input type="password" name="password" value={form.password} onChange={handleChangeForm} placeholder="Contraseña (mín. 9 caracteres)" className={inputCls('password')} />
+            </Campo>
+            <Campo error={formErrors.rol_id}>
+              <select name="rol_id" value={form.rol_id} onChange={handleChangeForm} className={inputCls('rol_id')}>
+                <option value={4}>Empleado</option><option value={1}>Administrador</option><option value={2}>Cliente</option>
+              </select>
+            </Campo>
             <div className="sm:col-span-2 mt-2 flex justify-end gap-2">
-              <button type="button" onClick={() => setCreating(false)} className="cursor-pointer rounded-full bg-jardin-crema px-4 py-2 text-sm font-semibold text-jardin-verde hover:bg-jardin-borde">Cancelar</button>
+              <button type="button" onClick={() => { setCreating(false); setFormErrors({}); }} className="cursor-pointer rounded-full bg-jardin-crema px-4 py-2 text-sm font-semibold text-jardin-verde hover:bg-jardin-borde">Cancelar</button>
               <button type="submit" className="cursor-pointer rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white hover:bg-jardin-terracotaOscuro">Crear</button>
             </div>
           </form>

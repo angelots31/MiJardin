@@ -78,11 +78,48 @@ def cambiar_estado_usuario(user_id: int, data: EstadoUsuario, current_user: dict
 
 @router.delete("/{user_id}")
 def delete_user(user_id: int, current_user: dict = Depends(require_roles("Administrador"))):
+    # Las tablas comerciales (facturas, ventas, pedidos, pqr) apuntan al
+    # cliente con ON DELETE CASCADE: si se borrara el usuario se llevaría
+    # su historial de facturación. Solo se permite borrar sin historial.
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    (SELECT COUNT(*) FROM facturas WHERE id_cliente = %s) AS facturas,
+                    (SELECT COUNT(*) FROM ventas   WHERE id_cliente = %s) AS ventas,
+                    (SELECT COUNT(*) FROM pedidos  WHERE id_cliente = %s) AS pedidos,
+                    (SELECT COUNT(*) FROM pqr      WHERE id_cliente = %s) AS pqr
+                """,
+                (user_id, user_id, user_id, user_id),
+            )
+            historial = cursor.fetchone()
+            motivos = []
+            if historial["facturas"]:
+                motivos.append(f"{historial['facturas']} factura(s)")
+            if historial["ventas"]:
+                motivos.append(f"{historial['ventas']} venta(s)")
+            if historial["pedidos"]:
+                motivos.append(f"{historial['pedidos']} pedido(s)")
+            if historial["pqr"]:
+                motivos.append(f"{historial['pqr']} PQR")
+            if motivos:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="No se puede eliminar este usuario porque tiene historial de facturación o actividad asociada: "
+                    + ", ".join(motivos)
+                    + ".",
+                )
             cursor.execute("DELETE FROM usuarios WHERE id_usuario=%s", (user_id,))
         connection.commit()
         return {"success": True, "message": "Usuario eliminado exitosamente."}
+    except HTTPException:
+        connection.rollback()
+        raise
+    except Exception:
+        connection.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="No se pudo eliminar el usuario.")
     finally:
         connection.close()
