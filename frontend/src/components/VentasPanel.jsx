@@ -55,12 +55,12 @@ function VentasPanel({ onVentaRegistrada }) {
   const cargarCatalogos = useCallback(async () => {
     try {
       const [usuarios, prods, servs, peds] = await Promise.all([
-        api('/api/v1/admin/users').catch(() => ({ data: [] })),
+        api('/api/v1/clientes').catch(() => ({ data: [] })),
         api('/api/v1/productos'),
         api('/api/v1/servicios'),
         api('/api/v1/pedidos').catch(() => ({ data: [] })),
       ]);
-      setClientes((usuarios.data || []).filter((u) => Number(u.rol_id) === 2));
+      setClientes(usuarios.data || []);
       setProductos(prods.data || []);
       setServicios(servs.data || []);
       setPedidos(peds.data || []);

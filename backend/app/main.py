@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routes import (
-    auth, usuarios, productos, servicios, pedidos,
+    auth, usuarios, clientes, productos, servicios, pedidos,
     ventas, facturas, reportes, pqr, estadisticas, chatbot,
 )
 
@@ -34,6 +34,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(usuarios.router)
+app.include_router(clientes.router)
 app.include_router(productos.router)
 app.include_router(servicios.router)
 app.include_router(pedidos.router)

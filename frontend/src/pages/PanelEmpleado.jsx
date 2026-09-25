@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Pencil, Plus, LayoutDashboard, Package, Wrench, ShoppingBag, Clock, Home, LogOut, Store } from 'lucide-react';
+import { Trash2, Pencil, Plus, LayoutDashboard, Package, Wrench, ShoppingBag, BadgeDollarSign, Receipt, MessageCircleQuestion, Clock, Home, LogOut, Store } from 'lucide-react';
 import { API_URL } from '../api/config';
 import Logo from '../components/Logo';
 import PedidosPanel from '../components/PedidosPanel';
+import VentasPanel from '../components/VentasPanel';
+import FacturasPanel from '../components/FacturasPanel';
+import PqrPanel from '../components/PqrPanel';
 import DashboardResumen from '../components/dashboard/DashboardResumen';
 
 const NAV_ITEMS = [
@@ -11,6 +14,9 @@ const NAV_ITEMS = [
   { id: 'productos', label: 'Productos', icon: Package, descripcion: 'Consulta, crea y actualiza los productos de la tienda.' },
   { id: 'servicios', label: 'Servicios', icon: Wrench, descripcion: 'Gestiona los servicios que ofrece MiJardín.' },
   { id: 'pedidos', label: 'Pedidos', icon: ShoppingBag, descripcion: 'Revisa y actualiza el estado de los pedidos de los clientes.' },
+  { id: 'ventas', label: 'Ventas', icon: BadgeDollarSign, descripcion: 'Registra ventas, descarga reportes y revisa el historial.' },
+  { id: 'facturas', label: 'Facturas', icon: Receipt, descripcion: 'Busca, revisa y descarga en PDF las facturas emitidas.' },
+  { id: 'pqr', label: 'PQR', icon: MessageCircleQuestion, descripcion: 'Atiende las peticiones, quejas, reclamos y sugerencias.' },
 ];
 
 const CLAVES_SESION = [
@@ -351,6 +357,15 @@ function PanelEmpleado() {
               <PedidosPanel />
             </div>
           )}
+
+          {/* === VENTAS === */}
+          {tab === 'ventas' && <VentasPanel />}
+
+          {/* === FACTURAS === */}
+          {tab === 'facturas' && <FacturasPanel />}
+
+          {/* === PQR === */}
+          {tab === 'pqr' && <PqrPanel />}
           </div>
         </div>
       </div>
