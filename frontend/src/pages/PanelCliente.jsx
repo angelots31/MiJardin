@@ -57,7 +57,7 @@ function PanelCliente() {
     <main className="min-h-screen bg-jardin-fondo">
       <div className="flex flex-col md:flex-row md:items-start">
         {/* === SIDEBAR === */}
-        <aside className="shrink-0 border-b border-jardin-verde/10 bg-white p-3 md:sticky md:top-0 md:h-screen md:w-64 md:border-b-0 md:border-r">
+        <aside className="shrink-0 border-b border-jardin-verde/10 bg-white p-3 md:fixed md:left-0 md:top-0 md:z-30 md:h-screen md:w-64 md:border-b-0 md:border-r">
           <Link to="/" className="mb-4 flex items-center px-2 pt-2" aria-label="MiJardín, ir al inicio">
             <Logo size={34} tono="oscuro" />
           </Link>
@@ -110,7 +110,7 @@ function PanelCliente() {
         </aside>
 
         {/* === CONTENIDO === */}
-        <div className="min-h-screen flex-1 p-4 sm:p-8">
+        <div className="min-h-screen flex-1 p-4 sm:p-8 md:ml-64">
           <div className="mx-auto max-w-6xl">
             <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>

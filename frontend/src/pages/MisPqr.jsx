@@ -88,7 +88,7 @@ function MisPqr() {
         </p>
         <button
           onClick={() => { setError(''); setAbriendo(true); }}
-          className="flex items-center gap-2 rounded-full bg-jardin-terracota px-5 py-2.5 text-sm font-bold text-white hover:bg-jardin-terracotaOscuro"
+          className="flex items-center gap-2 rounded-full bg-jardin-mostaza px-5 py-2.5 text-sm font-bold text-jardin-verde shadow-sm transition-colors hover:bg-[#D89A38]"
         >
           <Plus size={16} /> Nueva solicitud
         </button>

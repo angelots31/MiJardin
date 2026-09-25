@@ -66,11 +66,7 @@ function Header() {
                     Mi panel
                   </NavLink>
                 )}
-                {userRole === '2' && (
-                  <NavLink to="/tienda" onClick={() => setMenuAbierto(false)} className="header-user-dropdown-item">
-                    Ir a la tienda
-                  </NavLink>
-                )}
+                {/* La tienda se alcanza desde el panel del cliente, no desde aquí. */}
                 <button type="button" onClick={handleLogout} className="header-user-dropdown-item header-user-dropdown-danger">
                   Cerrar sesión
                 </button>

@@ -1,9 +1,14 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from './Logo';
 import './Footer.css';
 
 function Footer() {
   const año = new Date().getFullYear();
+  const { pathname } = useLocation();
+
+  // Los tres paneles son vistas a pantalla completa con su propio sidebar,
+  // así que ahí no mostramos el pie de página.
+  if (['/admin', '/empleado', '/mi-cuenta'].includes(pathname)) return null;
 
   return (
     <footer className="footer">
