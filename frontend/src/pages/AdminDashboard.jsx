@@ -11,7 +11,7 @@ import PqrPanel from '../components/PqrPanel';
 import { validateField, validateRegister, progresoFormulario } from '../components/auth/validation';
 
 const ROLES = { 1: 'Administrador', 2: 'Cliente', 4: 'Empleado' };
-const emptyUserForm = { nombres: '', apellidos: '', tipo_documento: 'CC', numero_documento: '', direccion: '', telefono: '', email: '', password: '', rol_id: 4 };
+const emptyUserForm = { nombres: '', apellidos: '', tipo_documento: 'CC', numero_documento: '', direccion: '', telefono: '', email: '', password: '', confirmPassword: '', rol_id: 4 };
 const emptyItemForm = { nombre: '', descripcion: '', precio: '' };
 
 function Campo({ error, className = '', children }) {
@@ -103,13 +103,23 @@ function AdminDashboard() {
     } catch (err) { setError(err.message); }
   };
 
-  useEffect(() => { fetchUsers(); fetchProductos(); fetchServicios(); }, []);
+  useEffect(() => {
+    (async () => {
+      await Promise.all([fetchUsers(), fetchProductos(), fetchServicios()]);
+    })();
+  }, []);
 
   // --- Usuarios CRUD ---
-  const handleDelete = async (id) => {
+  const handleDelete = async (user) => {
+    // Una cuenta activa no se elimina directamente: primero hay que
+    // inactivarla, para no dejar sin acceso a alguien que aún la usa.
+    if (user.estado === 'activo') {
+      setError('No puedes eliminar una cuenta activa. Márcala como inactiva antes de eliminarla.');
+      return;
+    }
     if (!window.confirm('¿Eliminar este usuario permanentemente?')) return;
     try {
-      const res = await fetch(`${API_URL}/api/v1/admin/users/${id}`, { method: 'DELETE', headers: authHeaders });
+      const res = await fetch(`${API_URL}/api/v1/admin/users/${user.id_usuario}`, { method: 'DELETE', headers: authHeaders });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       fetchUsers();
@@ -146,7 +156,15 @@ function AdminDashboard() {
     const { name, value } = e.target;
     const siguiente = { ...form, [name]: name === 'rol_id' ? Number(value) : value };
     setForm(siguiente);
-    setFormErrors((prev) => ({ ...prev, [name]: validateField(name, value, siguiente) }));
+    setFormErrors((prev) => {
+      const next = { ...prev, [name]: validateField(name, value, siguiente) };
+      // Al cambiar la contraseña se vuelve a comparar la confirmación, igual
+      // que en el modal de registro público.
+      if (name === 'password' && siguiente.confirmPassword) {
+        next.confirmPassword = validateField('confirmPassword', siguiente.confirmPassword, siguiente);
+      }
+      return next;
+    });
   };
 
   const createUser = async (e) => {
@@ -155,8 +173,21 @@ function AdminDashboard() {
     setFormErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
     try {
+      // Se envía solo lo que espera el backend: la confirmación es una
+      // regla del frontend y no debe viajar en el payload.
+      const payload = {
+        nombres: form.nombres,
+        apellidos: form.apellidos,
+        tipo_documento: form.tipo_documento,
+        numero_documento: form.numero_documento,
+        direccion: form.direccion,
+        telefono: form.telefono,
+        email: form.email,
+        password: form.password,
+        rol_id: form.rol_id,
+      };
       const res = await fetch(`${API_URL}/api/v1/admin/users`, {
-        method: 'POST', headers: authHeaders, body: JSON.stringify(form),
+        method: 'POST', headers: authHeaders, body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
@@ -249,7 +280,6 @@ function AdminDashboard() {
     } catch (err) { setError(err.message); }
   };
 
-  const cuentasActivas = users.filter((u) => u.estado === 'activo').length;
   const { completados, total } = progresoFormulario(form);
   const porcentaje = Math.round((completados / total) * 100);
   const inputCls = (campo) =>
@@ -387,7 +417,7 @@ function AdminDashboard() {
                       <td className="px-3 py-3 text-right">
                         <div className="flex justify-end gap-3">
                           <button onClick={() => setEditingUser({ id_usuario: user.id_usuario, nombres: user.nombres, apellidos: user.apellidos, estado: user.estado })} className="cursor-pointer text-jardin-terracota hover:text-jardin-terracotaOscuro"><Pencil size={18} /></button>
-                          <button onClick={() => handleDelete(user.id_usuario)} className="cursor-pointer text-red-500 hover:text-red-600"><Trash2 size={18} /></button>
+                          <button onClick={() => handleDelete(user)} className="cursor-pointer text-red-500 hover:text-red-600"><Trash2 size={18} /></button>
                         </div>
                       </td>
                     </tr>
@@ -508,10 +538,10 @@ function AdminDashboard() {
             )}
 
             <Campo error={formErrors.nombres}>
-              <input name="nombres" value={form.nombres} onChange={handleChangeForm} placeholder="Nombres" className={inputCls('nombres')} />
+              <input name="nombres" value={form.nombres} onChange={handleChangeForm} placeholder="Nombres" maxLength={40} className={inputCls('nombres')} />
             </Campo>
             <Campo error={formErrors.apellidos}>
-              <input name="apellidos" value={form.apellidos} onChange={handleChangeForm} placeholder="Apellidos" className={inputCls('apellidos')} />
+              <input name="apellidos" value={form.apellidos} onChange={handleChangeForm} placeholder="Apellidos" maxLength={40} className={inputCls('apellidos')} />
             </Campo>
             <Campo error={formErrors.tipo_documento}>
               <select name="tipo_documento" value={form.tipo_documento} onChange={handleChangeForm} className={inputCls('tipo_documento')}>
@@ -519,19 +549,22 @@ function AdminDashboard() {
               </select>
             </Campo>
             <Campo error={formErrors.numero_documento}>
-              <input name="numero_documento" value={form.numero_documento} onChange={handleChangeForm} placeholder="Número de documento" className={inputCls('numero_documento')} />
+              <input name="numero_documento" value={form.numero_documento} onChange={handleChangeForm} placeholder="Número de documento" maxLength={12} className={inputCls('numero_documento')} />
             </Campo>
             <Campo error={formErrors.direccion} className="sm:col-span-2">
-              <input name="direccion" value={form.direccion} onChange={handleChangeForm} placeholder="Dirección" className={inputCls('direccion')} />
+              <input name="direccion" value={form.direccion} onChange={handleChangeForm} placeholder="Dirección" maxLength={100} className={inputCls('direccion')} />
             </Campo>
             <Campo error={formErrors.telefono}>
-              <input name="telefono" value={form.telefono} onChange={handleChangeForm} placeholder="Teléfono" className={inputCls('telefono')} />
+              <input name="telefono" value={form.telefono} onChange={handleChangeForm} placeholder="Teléfono" maxLength={10} className={inputCls('telefono')} />
             </Campo>
             <Campo error={formErrors.email}>
-              <input type="email" name="email" value={form.email} onChange={handleChangeForm} placeholder="Correo electrónico" className={inputCls('email')} />
+              <input type="email" name="email" value={form.email} onChange={handleChangeForm} placeholder="Correo electrónico" maxLength={80} className={inputCls('email')} />
             </Campo>
             <Campo error={formErrors.password}>
-              <input type="password" name="password" value={form.password} onChange={handleChangeForm} placeholder="Contraseña (mín. 9 caracteres)" className={inputCls('password')} />
+              <input type="password" name="password" value={form.password} onChange={handleChangeForm} placeholder="Contraseña (9-20 caracteres)" maxLength={20} minLength={9} className={inputCls('password')} />
+            </Campo>
+            <Campo error={formErrors.confirmPassword}>
+              <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChangeForm} placeholder="Confirmar contraseña" maxLength={20} minLength={9} className={inputCls('confirmPassword')} />
             </Campo>
             <Campo error={formErrors.rol_id}>
               <select name="rol_id" value={form.rol_id} onChange={handleChangeForm} className={inputCls('rol_id')}>

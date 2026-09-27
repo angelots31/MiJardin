@@ -40,7 +40,9 @@ function MisPqr() {
     }
   };
 
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => {
+    (async () => { await cargar(); })();
+  }, []);
 
   useEffect(() => {
     if (!mensaje) return undefined;

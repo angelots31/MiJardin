@@ -18,6 +18,25 @@ try:
 except ValueError:
     IVA_PORCENTAJE = 19.0
 
+# Catálogo local de demostración del frontend. El servidor guarda sus precios
+# para no confiar en el precio que envía el navegador cuando un pedido no
+# apunta a un producto real de la base de datos.
+CATALOGO_DEMO = {
+    "Rosas rojas": 18000.0,
+    "Girasoles": 15000.0,
+    "Tulipanes": 22000.0,
+    "Ramo Primavera": 48000.0,
+    "Ramo Romántico": 65000.0,
+    "Lirios blancos": 25000.0,
+    "Ramo Campestre": 42000.0,
+    "Orquídea": 55000.0,
+}
+
+# Precio de los ramos que el cliente arma flor por flor.
+PRECIO_BASE_RAMO = 20000.0
+PRECIO_POR_FLOR = 7000.0
+MAX_FLORES_RAMO = 50
+
 
 def generar_consecutivo(cursor, tabla: str, columna: str, prefijo: str) -> str:
     """
@@ -29,12 +48,16 @@ def generar_consecutivo(cursor, tabla: str, columna: str, prefijo: str) -> str:
     """
     anio = datetime.now().year
     patron = f"{prefijo}-{anio}-%"
+    # Se toma el mayor consecutivo existente (no COUNT) para no reutilizar un
+    # número si se borró el último registro del año.
     cursor.execute(
-        f"SELECT COUNT(*) AS total FROM {tabla} WHERE {columna} LIKE %s",
+        f"SELECT MAX(CAST(SUBSTRING_INDEX({columna}, '-', -1) AS UNSIGNED)) AS ultimo "
+        f"FROM {tabla} WHERE {columna} LIKE %s",
         (patron,),
     )
-    fila = cursor.fetchone() or {"total": 0}
-    return f"{prefijo}-{anio}-{int(fila['total']) + 1:04d}"
+    fila = cursor.fetchone() or {"ultimo": 0}
+    ultimo = int(fila["ultimo"] or 0)
+    return f"{prefijo}-{anio}-{ultimo + 1:04d}"
 
 
 def calcular_totales(subtotal_bruto: float, descuento: float, aplica_impuestos: bool) -> dict:

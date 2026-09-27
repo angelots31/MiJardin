@@ -37,7 +37,9 @@ function PqrPanel() {
     }
   }, [filtros]);
 
-  useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => {
+    (async () => { await cargar(); })();
+  }, [cargar]);
 
   useEffect(() => {
     if (!mensaje) return undefined;

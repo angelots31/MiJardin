@@ -32,7 +32,9 @@ function PedidosPanel() {
     } catch (err) { setError(err.message); }
   };
 
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => {
+    (async () => { await cargar(); })();
+  }, []);
 
   const abrir = (pedido) => {
     setPedidoSeleccionado(pedido);

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from ..database import get_db_connection
 from ..schemas import CrearPedido, ActualizarPedido
 from ..security import get_current_user, require_roles
+from ..comercial import CATALOGO_DEMO, PRECIO_BASE_RAMO, PRECIO_POR_FLOR, MAX_FLORES_RAMO
 
 router = APIRouter(prefix="/api/v1/pedidos", tags=["Pedidos"])
 
@@ -49,7 +50,8 @@ def _items_con_precios(cursor, items):
         nombre = item.nombre_producto.strip()
         precio = float(item.precio)
 
-        # Si corresponde a un producto real de la BD, el servidor manda sobre nombre/precio.
+        # El servidor nunca confía en el precio que manda el navegador: lo
+        # recalcula según el tipo de ítem.
         if id_producto is not None:
             cursor.execute(
                 "SELECT id_producto, nombre, precio FROM productos WHERE id_producto=%s",
@@ -60,6 +62,19 @@ def _items_con_precios(cursor, items):
                 raise HTTPException(status_code=400, detail=f"El producto #{id_producto} no existe.")
             nombre = producto["nombre"]
             precio = float(producto["precio"])
+        elif item.es_personalizado:
+            flores = item.flores or []
+            if not flores:
+                raise HTTPException(status_code=400, detail="El ramo personalizado debe incluir al menos una flor.")
+            if len(flores) > MAX_FLORES_RAMO:
+                raise HTTPException(status_code=400, detail="El ramo personalizado tiene demasiadas flores.")
+            nombre = f"Ramo personalizado ({len(flores)} flores)"
+            precio = PRECIO_BASE_RAMO + len(flores) * PRECIO_POR_FLOR
+        else:
+            # Catálogo local de demostración: el precio lo fija el servidor.
+            if nombre not in CATALOGO_DEMO:
+                raise HTTPException(status_code=400, detail=f"El producto '{nombre}' no está en el catálogo.")
+            precio = float(CATALOGO_DEMO[nombre])
 
         if not nombre:
             raise HTTPException(status_code=400, detail="Cada producto debe tener un nombre.")

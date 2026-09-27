@@ -73,7 +73,11 @@ function PanelEmpleado() {
     } catch (err) { setError(err.message); }
   };
 
-  useEffect(() => { fetchProductos(); fetchServicios(); }, []);
+  useEffect(() => {
+    (async () => {
+      await Promise.all([fetchProductos(), fetchServicios()]);
+    })();
+  }, []);
 
   // --- Productos CRUD ---
   const createProduct = async (e) => {

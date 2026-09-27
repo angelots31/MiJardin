@@ -27,7 +27,9 @@ function MisPedidos() {
     }
   };
 
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => {
+    (async () => { await cargar(); })();
+  }, []);
 
   return (
     <div className="space-y-4">

@@ -17,6 +17,10 @@ def admin_create_user(user: AdminCreateUser, current_user: dict = Depends(requir
             cursor.execute("SELECT * FROM usuarios WHERE email = %s LIMIT 1", (email_normalizado,))
             if cursor.fetchone():
                 return JSONResponse(status_code=409, content={"success": False, "message": "El correo electrónico ya está registrado."})
+            cursor.execute("SELECT id_usuario FROM usuarios WHERE numero_documento = %s LIMIT 1",
+                           (user.numero_documento,))
+            if cursor.fetchone():
+                return JSONResponse(status_code=409, content={"success": False, "message": "El número de documento ya está registrado."})
             password_hash = pwd_context.hash(user.password)
             cursor.execute(
                 """INSERT INTO usuarios
@@ -84,6 +88,18 @@ def delete_user(user_id: int, current_user: dict = Depends(require_roles("Admini
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
+            # Una cuenta activa no se elimina directamente: primero debe
+            # inactivarse, para no dejar sin acceso a un usuario en uso.
+            cursor.execute("SELECT estado FROM usuarios WHERE id_usuario = %s", (user_id,))
+            usuario = cursor.fetchone()
+            if not usuario:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                    detail="El usuario que intentas eliminar no existe.")
+            if usuario["estado"] == "activo":
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="No puedes eliminar una cuenta activa. Márcala como inactiva y vuelve a intentarlo.",
+                )
             cursor.execute(
                 """
                 SELECT

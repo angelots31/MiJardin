@@ -38,7 +38,9 @@ export const validateField = (name, value, form = {}) => {
     if (!passwordRegex.test(v)) return '9-20 caracteres, al menos una letra y un número.';
   }
   if (campo === 'rol_id' && !['1', '2', '4'].includes(v)) return 'Selecciona un rol válido.';
-  if (campo === 'confirmPassword' && v !== form.contraseña) return 'Las contraseñas no coinciden.';
+  // El registro usa `contraseña` y el panel de admin `password`; la
+  // confirmación debe compararse con la que exista en cada formulario.
+  if (campo === 'confirmPassword' && v !== (form.contraseña ?? form.password)) return 'Las contraseñas no coinciden.';
   return '';
 };
 

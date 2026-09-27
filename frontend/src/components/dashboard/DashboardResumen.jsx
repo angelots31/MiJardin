@@ -59,7 +59,9 @@ function DashboardResumen({ rol = 'Administrador' }) {
     }
   }, [filtros]);
 
-  useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => {
+    (async () => { await cargar(); })();
+  }, [cargar]);
 
   if (cargando && !tarjetas) {
     return <p className="py-10 text-center text-[#6B7B70]">Cargando indicadores…</p>;

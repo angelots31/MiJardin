@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import Chatbot from './components/Chatbot';
 import ProtectedRoute from './components/ProtectedRoute';
+import { refrescarToken, tokenPorExpirar } from './api/client';
 import Index from './pages/Index';
 import QuienesSomos from './pages/QuienesSomos';
 import Contacto from './pages/Contacto';
@@ -15,6 +17,15 @@ import PanelCliente from './pages/PanelCliente';
 import NotFound from './pages/NotFound';
 
 function App() {
+  // Renueva la sesión antes de que el token expire. Cubre también los
+  // módulos que piden datos con fetch propio, no solo los que usan api().
+  useEffect(() => {
+    const renovar = () => { if (tokenPorExpirar()) refrescarToken(); };
+    renovar();
+    const intervalo = setInterval(renovar, 15 * 60 * 1000);
+    return () => clearInterval(intervalo);
+  }, []);
+
   return (
     <BrowserRouter>
       <Header />

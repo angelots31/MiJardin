@@ -23,10 +23,12 @@ function Login() {
   const returnTo = location.state?.returnTo || '/';
 
   useEffect(() => {
-    if (location.state?.registered) {
-      setPageMessage('¡Registro exitoso! Tu cuenta ya fue creada. Ahora inicia sesión para continuar.');
-      navigate(location.pathname, { replace: true, state: { returnTo } });
-    }
+    (async () => {
+      if (location.state?.registered) {
+        setPageMessage('¡Registro exitoso! Tu cuenta ya fue creada. Ahora inicia sesión para continuar.');
+        navigate(location.pathname, { replace: true, state: { returnTo } });
+      }
+    })();
   }, [location, navigate, returnTo]);
 
   const handleChange = (event) => {
@@ -76,7 +78,7 @@ function Login() {
       // al inicio; cada rol entra a su panel desde el menú del encabezado.
       const destination = returnTo.startsWith('/') && returnTo !== '/' ? returnTo : '/';
       navigate(destination, { state: { loginSuccess: true, userName: usuario.nombres } });
-    } catch (error) {
+    } catch {
       setServerError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
     } finally {
       setLoading(false);

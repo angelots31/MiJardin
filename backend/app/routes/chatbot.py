@@ -59,11 +59,21 @@ async def enviar_mensaje(datos: MensajeChat, authorization: Optional[str] = Head
             id_conversacion = datos.id_conversacion
             if id_conversacion:
                 cursor.execute(
-                    "SELECT id_conversacion FROM conversaciones WHERE id_conversacion = %s",
+                    "SELECT id_conversacion, id_usuario FROM conversaciones WHERE id_conversacion = %s",
                     (id_conversacion,),
                 )
-                if not cursor.fetchone():
+                existente = cursor.fetchone()
+                if not existente:
                     id_conversacion = None
+                else:
+                    dueno = existente["id_usuario"]
+                    # Solo su dueño puede continuarla; las conversaciones
+                    # anónimas (sin usuario) siguen abiertas al visitante.
+                    if dueno is not None and (id_usuario is None or int(dueno) != id_usuario):
+                        raise HTTPException(
+                            status_code=403,
+                            detail="No puedes continuar esta conversación.",
+                        )
 
             if not id_conversacion:
                 titulo = datos.mensaje[:60] + ("…" if len(datos.mensaje) > 60 else "")
@@ -119,6 +129,9 @@ async def enviar_mensaje(datos: MensajeChat, authorization: Optional[str] = Head
             "respuesta": texto,
             "motor": motor,
         }
+    except HTTPException:
+        connection.rollback()
+        raise
     except Exception as error:
         connection.rollback()
         return JSONResponse(status_code=500, content={"success": False, "message": str(error)})
@@ -127,8 +140,12 @@ async def enviar_mensaje(datos: MensajeChat, authorization: Optional[str] = Head
 
 
 @router.get("/conversaciones/{id_conversacion}")
-def obtener_conversacion(id_conversacion: int):
-    """Devuelve los mensajes de una conversación para recuperarla al recargar."""
+def obtener_conversacion(id_conversacion: int, current_user: dict = Depends(get_current_user)):
+    """Devuelve los mensajes de una conversación para recuperarla al recargar.
+
+    Solo puede verla su dueño o el equipo (Administrador/Empleado): así nadie
+    puede leer conversaciones ajenas adivinando el id.
+    """
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
@@ -139,6 +156,10 @@ def obtener_conversacion(id_conversacion: int):
             conversacion = cursor.fetchone()
             if not conversacion:
                 raise HTTPException(status_code=404, detail="La conversación no existe.")
+            es_equipo = current_user.get("rol_nombre") in ("Administrador", "Empleado")
+            dueno = conversacion.get("id_usuario")
+            if not es_equipo and (dueno is None or int(dueno) != int(current_user["id_usuario"])):
+                raise HTTPException(status_code=403, detail="No puedes consultar esta conversación.")
             cursor.execute(
                 """
                 SELECT id_mensaje, rol, contenido, fecha_envio FROM mensajes

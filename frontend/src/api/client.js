@@ -17,6 +17,54 @@ export const authHeaders = () => {
     : { 'Content-Type': 'application/json' };
 };
 
+/** Claves de sesión que se borran al cerrarla o al expirar el token. */
+const CLAVES_SESION = [
+  'mijardin_logged', 'mijardin_token', 'mijardin_user', 'mijardin_user_name',
+  'mijardin_user_id', 'mijardin_user_role', 'mijardin_user_role_nombre', 'mijardin_remember',
+];
+
+/** Borra la sesión y manda al login cuando el token ya no sirve. */
+export const cerrarSesionExpirada = () => {
+  CLAVES_SESION.forEach((clave) => localStorage.removeItem(clave));
+  if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+    window.location.assign('/login');
+  }
+};
+
+/** Lee el `exp` del JWT sin dependencias externas. */
+export const tokenPorExpirar = () => {
+  const token = getToken();
+  if (!token) return false;
+  try {
+    const base = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const datos = JSON.parse(atob(base));
+    if (!datos.exp) return false;
+    // Se renueva cuando queda menos de una hora de sesión.
+    return datos.exp - Date.now() / 1000 < 3600;
+  } catch {
+    return false;
+  }
+};
+
+/** Pide un token nuevo con el token actual. Devuelve true si lo consiguió. */
+export const refrescarToken = async () => {
+  const token = getToken();
+  if (!token) return false;
+  try {
+    const respuesta = await fetch(`${API_URL}/api/v1/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    });
+    if (!respuesta.ok) return false;
+    const datos = await respuesta.json();
+    if (!datos.success || !datos.token) return false;
+    localStorage.setItem('mijardin_token', datos.token);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 /** Convierte un objeto en query string, ignorando los campos vacíos. */
 export const toQuery = (params = {}) => {
   const query = new URLSearchParams();
@@ -33,15 +81,31 @@ export const toQuery = (params = {}) => {
  * para que quien llame solo tenga que envolver en try/catch.
  */
 export async function api(ruta, opciones = {}) {
+  // Antes de pedir nada, si la sesión está por vencer se renueva en silencio.
+  if (tokenPorExpirar()) await refrescarToken();
+
+  const hacerPeticion = () => fetch(`${API_URL}${ruta}`, { headers: authHeaders(), ...opciones });
+
   let respuesta;
   try {
-    respuesta = await fetch(`${API_URL}${ruta}`, { headers: authHeaders(), ...opciones });
+    respuesta = await hacerPeticion();
   } catch {
     throw new Error('No hay conexión con el servidor. Revisa que el backend esté corriendo.');
   }
 
   if (respuesta.status === 401) {
-    throw new Error('Tu sesión expiró. Vuelve a iniciar sesión.');
+    // Reintento único por si el token acababa de vencer.
+    if (await refrescarToken()) {
+      try {
+        respuesta = await hacerPeticion();
+      } catch {
+        throw new Error('No hay conexión con el servidor. Revisa que el backend esté corriendo.');
+      }
+    }
+    if (respuesta.status === 401) {
+      cerrarSesionExpirada();
+      throw new Error('Tu sesión expiró. Vuelve a iniciar sesión.');
+    }
   }
 
   let datos;

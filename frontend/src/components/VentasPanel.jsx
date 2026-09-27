@@ -67,8 +67,12 @@ function VentasPanel({ onVentaRegistrada }) {
     } catch { /* si algún catálogo falla, el resto del panel sigue sirviendo */ }
   }, []);
 
-  useEffect(() => { cargarVentas(); }, [cargarVentas]);
-  useEffect(() => { cargarCatalogos(); }, [cargarCatalogos]);
+  useEffect(() => {
+    (async () => { await cargarVentas(); })();
+  }, [cargarVentas]);
+  useEffect(() => {
+    (async () => { await cargarCatalogos(); })();
+  }, [cargarCatalogos]);
 
   useEffect(() => {
     if (!mensaje) return undefined;

@@ -108,6 +108,10 @@ class PedidoItem(BaseModel):
     nombre_producto: str
     cantidad: int
     precio: float
+    # Ramos que el cliente arma flor por flor: el servidor recalcula su
+    # precio, por eso se necesita saber que es personalizado y con qué flores.
+    es_personalizado: bool = False
+    flores: Optional[list[str]] = None
 
 
 class CrearPedido(BaseModel):

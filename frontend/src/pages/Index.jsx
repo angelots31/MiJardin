@@ -18,10 +18,12 @@ function Index() {
   }, [message]);
 
   useEffect(() => {
-    if (location.state?.loginSuccess) {
-      setMessage(`¡Bienvenido, ${location.state.userName}! Iniciaste sesión correctamente.`);
-      navigate('/', { replace: true, state: {} });
-    }
+    (async () => {
+      if (location.state?.loginSuccess) {
+        setMessage(`¡Bienvenido, ${location.state.userName}! Iniciaste sesión correctamente.`);
+        navigate('/', { replace: true, state: {} });
+      }
+    })();
   }, [location, navigate]);
 
   return (

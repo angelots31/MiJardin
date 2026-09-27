@@ -28,7 +28,9 @@ function MisCompras() {
     }
   };
 
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => {
+    (async () => { await cargar(); })();
+  }, []);
 
   const totalComprado = ventas
     .filter((v) => v.estado !== 'Anulada')

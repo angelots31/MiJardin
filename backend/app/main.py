@@ -27,7 +27,10 @@ origins = ["*"] if _origins.strip() == "*" else [o.strip() for o in _origins.spl
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    # Con "*" los navegadores rechazan enviar credenciales. El frontend usa
+    # token Bearer, así que solo se activan si CORS_ORIGINS tiene orígenes
+    # concretos (p. ej. http://localhost:5173).
+    allow_credentials=origins != ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

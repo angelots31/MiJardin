@@ -15,16 +15,34 @@ function Tienda() {
   const userRole = localStorage.getItem('mijardin_user_role');
   const token = localStorage.getItem('mijardin_token');
   const puedePublicar = userRole === '1' || userRole === '4'; // Administrador o Empleado
+  const puedeComprar = userRole === '2'; // Solo el Cliente puede crear pedidos
   const fetchProductos = async () => {
     try {
       const res = await fetch(`${API_URL}/api/v1/productos`);
       const json = await res.json();
-      // La BD usa id_producto como llave primaria; se mapea a `id` para que
-      // el carrito y las `key` de React puedan identificar cada producto.
-      if (json.success) setCatalogo([...productos, ...json.data.map(p => ({...p, id: p.id_producto, esDb: true, imagen: p.imagen || productos[0].imagen, tienda: 'Tienda Nueva'}))]);
-    } catch (e) {}
+      // Los productos locales y los de la BD usan ids en el mismo rango
+      // (1, 2, 3...), así que el id de la BD se prefija para que no choquen
+      // en el carrito ni en las `key` de React.
+      if (json.success) {
+        setCatalogo([
+          ...productos,
+          ...json.data.map((p) => ({
+            ...p,
+            id: `db-${p.id_producto}`,
+            id_producto: p.id_producto,
+            esDb: true,
+            imagen: p.imagen || productos[0].imagen,
+            tienda: 'Tienda Nueva',
+          })),
+        ]);
+      }
+    } catch {
+      // Si el backend no responde, se conserva el catálogo local.
+    }
   };
-  useEffect(() => { fetchProductos(); }, []);
+  useEffect(() => {
+    (async () => { await fetchProductos(); })();
+  }, []);
   const [cart, setCart] = useState([]);
   const [filtro, setFiltro] = useState('Todos');
   const [busqueda, setBusqueda] = useState('');
@@ -36,10 +54,12 @@ function Tienda() {
   const logged = localStorage.getItem('mijardin_logged') === 'true';
 
   useEffect(() => {
-    if (location.state?.loginSuccess) {
-      setLoginMessage(`¡Bienvenido, ${location.state.userName}! Ya puedes comprar y armar tus ramos.`);
-      navigate('/tienda', { replace: true, state: {} });
-    }
+    (async () => {
+      if (location.state?.loginSuccess) {
+        setLoginMessage(`¡Bienvenido, ${location.state.userName}! Ya puedes comprar y armar tus ramos.`);
+        navigate('/tienda', { replace: true, state: {} });
+      }
+    })();
   }, [location, navigate]);
 
   useEffect(() => {
@@ -56,6 +76,7 @@ function Tienda() {
   }), [catalogo, filtro, busqueda]);
 
   const addToCart = (producto) => {
+    if (!puedeComprar) { setStoreMessage('Solo las cuentas de cliente pueden agregar productos al carrito.'); return; }
     setCart((actual) => {
       const encontrado = actual.find((item) => item.id === producto.id);
       if (encontrado) return actual.map((item) => item.id === producto.id ? { ...item, cantidad: item.cantidad + 1 } : item);
@@ -76,9 +97,11 @@ function Tienda() {
   };
 
   const addCustomBouquet = () => {
+    if (!puedeComprar) { setStoreMessage('Solo las cuentas de cliente pueden armar un ramo para comprar.'); return; }
     if (!custom.flores.length) { setStoreMessage('Selecciona al menos una flor para crear tu ramo personalizado.'); return; }
     const precio = 20000 + custom.flores.length * 7000;
-    addToCart({ id: `custom-${Date.now()}`, nombre: `Ramo personalizado (${custom.flores.length} flores)`, categoria: 'Ramos', precio, tienda: 'MiJardín - Varias tiendas', imagen: productos[3].imagen, descripcion: `${custom.flores.join(', ')} · Envoltura ${custom.envoltura}` });
+    // El precio es solo una referencia: el backend lo recalcula al crear el pedido.
+    addToCart({ id: `custom-${Date.now()}`, nombre: `Ramo personalizado (${custom.flores.length} flores)`, categoria: 'Ramos', precio, tienda: 'MiJardín - Varias tiendas', imagen: productos[3].imagen, descripcion: `${custom.flores.join(', ')} · Envoltura ${custom.envoltura}`, esPersonalizado: true, flores: custom.flores });
     setCustom({ flores: [], envoltura: 'Kraft', nota: '' });
     setStoreMessage('Tu ramo personalizado fue agregado al carrito.');
   };
@@ -89,10 +112,12 @@ function Tienda() {
     if (!authToken) { setStoreMessage('Debes iniciar sesión para realizar el pedido.'); return; }
     try {
       const items = cart.map((item) => ({
-        id_producto: item.esDb ? Number(item.id) : null,
+        id_producto: item.esDb ? Number(item.id_producto) : null,
         nombre_producto: item.nombre,
         cantidad: item.cantidad,
         precio: Number(item.precio),
+        // Los ramos personalizados los vuelve a calcular el servidor.
+        ...(item.esPersonalizado ? { es_personalizado: true, flores: item.flores } : {}),
       }));
       const res = await fetch(`${API_URL}/api/v1/pedidos`, {
         method: 'POST',
@@ -161,7 +186,11 @@ function Tienda() {
           </div>
           <div className="flex gap-2">
             <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar flores o tiendas..." className="w-full rounded-full border border-[#7C9473]/30 bg-white px-5 py-2.5 outline-none focus:ring-2 focus:ring-[#D9714E] sm:w-72" />
-            <button onClick={() => setCartOpen(true)} className="cursor-pointer whitespace-nowrap rounded-full bg-[#23392E] px-5 py-2.5 font-bold text-white">🛒 Carrito ({cartCount})</button>
+            {puedeComprar ? (
+              <button onClick={() => setCartOpen(true)} className="cursor-pointer whitespace-nowrap rounded-full bg-[#23392E] px-5 py-2.5 font-bold text-white">🛒 Carrito ({cartCount})</button>
+            ) : (
+              <span className="self-center rounded-full bg-[#F1E7D6] px-4 py-2 text-xs font-semibold text-[#6B7B70]">Solo las cuentas de cliente pueden comprar</span>
+            )}
           </div>
         </div>
 

@@ -22,6 +22,14 @@ def register(user: RegisterUser):
                     content={"success": False, "message": "El correo electrónico ya está registrado."}
                 )
 
+            cursor.execute("SELECT id_usuario FROM usuarios WHERE numero_documento = %s LIMIT 1",
+                           (user.numero_documento,))
+            if cursor.fetchone():
+                return JSONResponse(
+                    status_code=status.HTTP_409_CONFLICT,
+                    content={"success": False, "message": "El número de documento ya está registrado."}
+                )
+
             password_hash = pwd_context.hash(user.password)
             rol_cliente = 2  # Cliente
 
@@ -95,3 +103,19 @@ def login(user: LoginUser):
 def me(current_user: dict = Depends(get_current_user)):
     """Permite al frontend validar el token guardado y recuperar el rol actual."""
     return {"success": True, "usuario": current_user}
+
+
+@router.post("/refresh")
+def refresh(current_user: dict = Depends(get_current_user)):
+    """
+    Emite un token nuevo a partir de uno todavía válido.
+
+    El frontend lo llama de forma proactiva antes de que expire para no
+    cortar la sesión de quien está trabajando.
+    """
+    token = create_access_token({
+        "id_usuario": current_user["id_usuario"],
+        "rol_id": current_user["rol_id"],
+        "rol_nombre": current_user["rol_nombre"],
+    })
+    return {"success": True, "token": token}

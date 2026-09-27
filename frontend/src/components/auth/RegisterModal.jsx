@@ -77,7 +77,7 @@ function RegisterModal({ open, onClose, returnTo = '/', onRegistered }) {
       onRegistered?.();
       handleClose();
       navigate('/login', { replace: true, state: { registered: true, returnTo } });
-    } catch (error) {
+    } catch {
       // Esto ocurre si el backend no está corriendo o hay un problema de red.
       setServerError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
     } finally {
@@ -119,8 +119,8 @@ function RegisterModal({ open, onClose, returnTo = '/', onRegistered }) {
           <div className="sm:col-span-2"><Input label="Dirección" name="direccion" value={form.direccion} onChange={handleChange} error={errors.direccion} maxLength={100} /></div>
           <Input label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} error={errors.telefono} maxLength={10} />
           <Input label="Correo electrónico" name="correo" type="email" value={form.correo} onChange={handleChange} error={errors.correo} maxLength={80} />
-          <Input label="Contraseña" name="contraseña" type="password" value={form.contraseña} onChange={handleChange} error={errors.contraseña} maxLength={20} />
-          <Input label="Confirmación de contraseña" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} error={errors.confirmPassword} maxLength={20} />
+          <Input label="Contraseña" name="contraseña" type="password" value={form.contraseña} onChange={handleChange} error={errors.contraseña} maxLength={20} minLength={9} />
+          <Input label="Confirmación de contraseña" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} error={errors.confirmPassword} maxLength={20} minLength={9} />
           <div className="flex flex-col gap-2 pt-2 sm:col-span-2 sm:flex-row sm:justify-end">
             <Button variant="secondary" onClick={handleClose} disabled={loading}>Cancelar</Button>
             <Button type="submit" disabled={loading}>{loading ? 'Registrando...' : 'Registrarme'}</Button>
