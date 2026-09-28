@@ -332,9 +332,26 @@ IA_API_KEY=TU_API_KEY
 IA_BASE_URL=https://api.openai.com/v1
 IA_MODELO=TU_MODELO
 IA_TIMEOUT=30
+
+# Recuperación de contraseña (envío de correos por SMTP)
+FRONTEND_URL=http://localhost:5173
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=tu_correo@gmail.com
+SMTP_PASSWORD=tu_contrasena_de_aplicacion
+SMTP_FROM=tu_correo@gmail.com
+RESET_PASSWORD_MINUTOS=60
 ```
 
 > ⚠️ **Importante:** nunca publiques el archivo `.env`, contraseñas, claves API o secretos JWT en GitHub.
+
+### 📧 Recuperación de contraseña
+
+1. El usuario entra a **Iniciar sesión → ¿Olvidaste tu contraseña?** y escribe su correo.
+2. El backend genera un token de un solo uso (válido `RESET_PASSWORD_MINUTOS`) y envía un enlace a `FRONTEND_URL/restablecer-password?token=…`.
+3. Desde ese enlace el usuario define su nueva contraseña.
+
+Para que funcione hay que configurar `SMTP_*` en `backend/.env`. Con Gmail hay que crear una **contraseña de aplicación** (no sirve la contraseña normal de la cuenta). Los tokens se guardan cifrados (hash) en la tabla `password_resets`, que se crea automáticamente la primera vez que se usa.
 
 Ejecutar el backend:
 

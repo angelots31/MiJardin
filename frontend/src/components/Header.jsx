@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import Logo from './Logo';
 import './Header.css';
 
@@ -17,6 +18,8 @@ function Header() {
   const rutaPanel = RUTA_POR_ROL[userRole];
 
   const [menuAbierto, setMenuAbierto] = useState(false);
+  // En móvil la navegación se despliega desde el botón hamburguesa.
+  const [navAbierto, setNavAbierto] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -31,6 +34,7 @@ function Header() {
     ['mijardin_logged', 'mijardin_token', 'mijardin_user', 'mijardin_user_name', 'mijardin_user_id', 'mijardin_user_role', 'mijardin_user_role_nombre', 'mijardin_remember']
       .forEach((key) => localStorage.removeItem(key));
     setMenuAbierto(false);
+    setNavAbierto(false);
     navigate('/');
   };
 
@@ -41,11 +45,22 @@ function Header() {
       <Link to="/" className="header-logo" aria-label="MiJardín, ir al inicio">
         <Logo size={32} />
       </Link>
-      <nav className="header-nav">
-        <NavLink to="/" end className={({ isActive }) => isActive ? 'activo' : ''}>Inicio</NavLink>
-        <NavLink to="/quienes-somos" className={({ isActive }) => isActive ? 'activo' : ''}>¿Quiénes Somos?</NavLink>
-        <NavLink to="/contacto" className={({ isActive }) => isActive ? 'activo' : ''}>Contacto</NavLink>
-        <NavLink to="/tienda" className={({ isActive }) => isActive ? 'activo' : ''}>Tienda</NavLink>
+      {/* Solo visible en pantallas pequeñas (ver Header.css). */}
+      <button
+        type="button"
+        className="header-toggle"
+        onClick={() => setNavAbierto((v) => !v)}
+        aria-expanded={navAbierto}
+        aria-controls="header-nav"
+        aria-label={navAbierto ? 'Cerrar el menú de navegación' : 'Abrir el menú de navegación'}
+      >
+        {navAbierto ? <X size={22} /> : <Menu size={22} />}
+      </button>
+      <nav id="header-nav" className={`header-nav ${navAbierto ? 'abierto' : ''}`}>
+        <NavLink to="/" end onClick={() => setNavAbierto(false)} className={({ isActive }) => isActive ? 'activo' : ''}>Inicio</NavLink>
+        <NavLink to="/quienes-somos" onClick={() => setNavAbierto(false)} className={({ isActive }) => isActive ? 'activo' : ''}>¿Quiénes Somos?</NavLink>
+        <NavLink to="/contacto" onClick={() => setNavAbierto(false)} className={({ isActive }) => isActive ? 'activo' : ''}>Contacto</NavLink>
+        <NavLink to="/tienda" onClick={() => setNavAbierto(false)} className={({ isActive }) => isActive ? 'activo' : ''}>Tienda</NavLink>
         {logged ? (
           <div className="header-user-menu" ref={menuRef}>
             <button
@@ -62,7 +77,11 @@ function Header() {
             {menuAbierto && (
               <div className="header-user-dropdown">
                 {rutaPanel && (
-                  <NavLink to={rutaPanel} onClick={() => setMenuAbierto(false)} className="header-user-dropdown-item">
+                  <NavLink
+                    to={rutaPanel}
+                    onClick={() => { setMenuAbierto(false); setNavAbierto(false); }}
+                    className="header-user-dropdown-item"
+                  >
                     Mi panel
                   </NavLink>
                 )}
@@ -74,7 +93,7 @@ function Header() {
             )}
           </div>
         ) : (
-          <NavLink to="/login" className={({ isActive }) => isActive ? 'activo' : ''}>Iniciar sesión</NavLink>
+          <NavLink to="/login" onClick={() => setNavAbierto(false)} className={({ isActive }) => isActive ? 'activo' : ''}>Iniciar sesión</NavLink>
         )}
       </nav>
     </header>

@@ -56,6 +56,7 @@ function AdminDashboard() {
   // --- Usuarios ---
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
+  const [mensaje, setMensaje] = useState('');
   const [editingUser, setEditingUser] = useState(null);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState(emptyUserForm);
@@ -109,6 +110,21 @@ function AdminDashboard() {
     })();
   }, []);
 
+  // Los avisos de éxito se ocultan solos para no dejar la pantalla cargada.
+  useEffect(() => {
+    if (!mensaje) return undefined;
+    const t = setTimeout(() => setMensaje(''), 5000);
+    return () => clearTimeout(t);
+  }, [mensaje]);
+
+  // Al cambiar de sección se limpian los avisos: así un mensaje de una
+  // pestaña (p. ej. el de "no se puede eliminar este usuario") no aparece en otra.
+  const cambiarTab = (nuevo) => {
+    setTab(nuevo);
+    setError('');
+    setMensaje('');
+  };
+
   // --- Usuarios CRUD ---
   const handleDelete = async (user) => {
     // Una cuenta activa no se elimina directamente: primero hay que
@@ -122,6 +138,7 @@ function AdminDashboard() {
       const res = await fetch(`${API_URL}/api/v1/admin/users/${user.id_usuario}`, { method: 'DELETE', headers: authHeaders });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
+      setMensaje(data.message || 'Usuario eliminado exitosamente.');
       fetchUsers();
     } catch (err) { setError(err.message); }
   };
@@ -134,6 +151,7 @@ function AdminDashboard() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
+      setMensaje(data.message || 'Estado del usuario actualizado.');
       fetchUsers();
     } catch (err) { setError(err.message); }
   };
@@ -148,6 +166,7 @@ function AdminDashboard() {
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       setEditingUser(null);
+      setMensaje(data.message || 'Usuario actualizado exitosamente.');
       fetchUsers();
     } catch (err) { setError(err.message); }
   };
@@ -194,6 +213,7 @@ function AdminDashboard() {
       setCreating(false);
       setForm(emptyUserForm);
       setFormErrors({});
+      setMensaje(data.message || 'Usuario creado exitosamente.');
       fetchUsers();
     } catch (err) { setError(err.message); }
   };
@@ -211,6 +231,7 @@ function AdminDashboard() {
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       setCreatingProduct(false);
       setProductForm(emptyItemForm);
+      setMensaje(data.message || 'Producto agregado exitosamente.');
       fetchProductos();
     } catch (err) { setError(err.message); }
   };
@@ -225,6 +246,7 @@ function AdminDashboard() {
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       setEditingProduct(null);
+      setMensaje(data.message || 'Producto actualizado exitosamente.');
       fetchProductos();
     } catch (err) { setError(err.message); }
   };
@@ -235,6 +257,7 @@ function AdminDashboard() {
       const res = await fetch(`${API_URL}/api/v1/productos/${id}`, { method: 'DELETE', headers: authHeaders });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
+      setMensaje(data.message || 'Producto eliminado exitosamente.');
       fetchProductos();
     } catch (err) { setError(err.message); }
   };
@@ -252,6 +275,7 @@ function AdminDashboard() {
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       setCreatingServicio(false);
       setServicioForm(emptyItemForm);
+      setMensaje(data.message || 'Servicio agregado exitosamente.');
       fetchServicios();
     } catch (err) { setError(err.message); }
   };
@@ -266,6 +290,7 @@ function AdminDashboard() {
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       setEditingServicio(null);
+      setMensaje(data.message || 'Servicio actualizado exitosamente.');
       fetchServicios();
     } catch (err) { setError(err.message); }
   };
@@ -276,6 +301,7 @@ function AdminDashboard() {
       const res = await fetch(`${API_URL}/api/v1/servicios/${id}`, { method: 'DELETE', headers: authHeaders });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
+      setMensaje(data.message || 'Servicio eliminado exitosamente.');
       fetchServicios();
     } catch (err) { setError(err.message); }
   };
@@ -306,7 +332,7 @@ function AdminDashboard() {
             {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => setTab(id)}
+                onClick={() => cambiarTab(id)}
                 className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors md:w-full md:text-left ${
                   tab === id
                     ? 'bg-jardin-verde text-white shadow-md'
@@ -356,7 +382,7 @@ function AdminDashboard() {
                   {NAV_ITEMS.find((n) => n.id === tab)?.descripcion}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {tab === 'usuarios' && <button onClick={() => { setFormErrors({}); setCreating(true); }} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar usuario</button>}
                 {tab === 'productos' && <button onClick={() => setCreatingProduct(true)} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar producto</button>}
                 {tab === 'servicios' && <button onClick={() => setCreatingServicio(true)} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar servicio</button>}
@@ -366,7 +392,8 @@ function AdminDashboard() {
               </div>
             </header>
 
-            {error && <div className="mb-4 rounded-2xl border border-jardin-errorBorder bg-jardin-errorBg p-3 text-sm text-[#B3431E]">{error}</div>}
+            {mensaje && <div className="mb-4 rounded-2xl border border-[#B9CBB2] bg-jardin-successBg p-3 text-sm text-jardin-success" role="status">{mensaje}</div>}
+            {error && <div className="mb-4 rounded-2xl border border-jardin-errorBorder bg-jardin-errorBg p-3 text-sm text-[#B3431E]" role="alert">{error}</div>}
 
           {tab === 'pedidos' && (
             <div className="rounded-3xl border border-jardin-borde bg-white p-5 shadow-sm sm:p-6">
@@ -391,7 +418,7 @@ function AdminDashboard() {
           {/* === TABLA USUARIOS === */}
           {tab === 'usuarios' && (
             <div className="overflow-x-auto rounded-3xl border border-jardin-borde bg-white shadow-sm">
-              <table className="w-full text-left text-sm">
+              <table className="w-full min-w-[760px] text-left text-sm">
                 <thead className="border-b border-jardin-borde bg-jardin-fondo text-xs font-bold uppercase tracking-wide text-jardin-salvia">
                   <tr>
                     <th className="px-3 py-3">Nombre</th>
@@ -431,7 +458,7 @@ function AdminDashboard() {
           {/* === TABLA PRODUCTOS === */}
           {tab === 'productos' && (
             <div className="overflow-x-auto rounded-3xl border border-jardin-borde bg-white shadow-sm">
-              <table className="w-full text-left text-sm">
+              <table className="w-full min-w-[600px] text-left text-sm">
                 <thead className="border-b border-jardin-borde bg-jardin-fondo text-xs font-bold uppercase tracking-wide text-jardin-salvia">
                   <tr>
                     <th className="px-3 py-3">Producto</th>
@@ -463,7 +490,7 @@ function AdminDashboard() {
           {/* === TABLA SERVICIOS === */}
           {tab === 'servicios' && (
             <div className="overflow-x-auto rounded-3xl border border-jardin-borde bg-white shadow-sm">
-              <table className="w-full text-left text-sm">
+              <table className="w-full min-w-[600px] text-left text-sm">
                 <thead className="border-b border-jardin-borde bg-jardin-fondo text-xs font-bold uppercase tracking-wide text-jardin-salvia">
                   <tr>
                     <th className="px-3 py-3">Servicio</th>
@@ -519,7 +546,7 @@ function AdminDashboard() {
       {/* === MODAL CREAR USUARIO === */}
       {creating && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-jardin-verdeOscuro/60 p-4 backdrop-blur-sm" onClick={() => setCreating(false)}>
-          <form onSubmit={createUser} noValidate onClick={(e) => e.stopPropagation()} className="grid w-full max-w-lg gap-3 rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-jardin-borde sm:grid-cols-2">
+          <form onSubmit={createUser} noValidate onClick={(e) => e.stopPropagation()} className="grid max-h-[90vh] w-full max-w-lg gap-3 overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-jardin-borde sm:grid-cols-2">
             <div className="flex items-center justify-between gap-3 sm:col-span-2">
               <h2 className="text-xl font-bold text-jardin-verde">Agregar usuario</h2>
               <span className="whitespace-nowrap rounded-full bg-jardin-fondo px-3 py-1 text-xs font-bold text-jardin-verde">

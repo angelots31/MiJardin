@@ -234,7 +234,7 @@ function VentasPanel({ onVentaRegistrada }) {
           <select
             defaultValue=""
             onChange={(e) => { convertirPedido(e.target.value); e.target.value = ''; }}
-            className="mt-1 block w-60 rounded-lg border border-jardin-borde px-3 py-2 text-sm"
+            className="mt-1 block w-60 max-w-full rounded-lg border border-jardin-borde px-3 py-2 text-sm"
           >
             <option value="">Selecciona un pedido…</option>
             {pedidosSinFacturar.map((p) => (
@@ -363,7 +363,7 @@ function VentasPanel({ onVentaRegistrada }) {
 
       {/* Historial */}
       <section className="overflow-x-auto rounded-xl border border-jardin-borde bg-white">
-        <table className="w-full text-left text-sm">
+        <table className="w-full min-w-[880px] text-left text-sm">
           <thead className="bg-jardin-verde text-jardin-fondo">
             <tr>
               <th className="px-3 py-3">N.º venta</th>
@@ -430,7 +430,7 @@ function VentasPanel({ onVentaRegistrada }) {
       {/* Modal: detalle de una venta */}
       {detalle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6">
+          <div className="max-h-[85vh] w-full max-w-2xl overflow-x-auto overflow-y-auto rounded-xl bg-white p-6">
             <div className="mb-4 flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-jardin-verde">Venta {detalle.numero_venta}</h3>
@@ -440,7 +440,7 @@ function VentasPanel({ onVentaRegistrada }) {
                 <X size={20} />
               </button>
             </div>
-            <table className="w-full text-left text-sm">
+            <table className="w-full min-w-[520px] text-left text-sm">
               <thead className="border-b border-jardin-borde text-[#6B7B70]">
                 <tr>
                   <th className="py-2">Ítem</th>
@@ -518,8 +518,8 @@ function VentasPanel({ onVentaRegistrada }) {
             <h4 className="mt-5 text-sm font-semibold text-jardin-verde">Productos y servicios</h4>
             <div className="mt-2 space-y-2">
               {formulario.lineas.map((linea, indice) => (
-                <div key={indice} className="grid grid-cols-12 items-end gap-2 rounded-lg bg-jardin-fondo p-2">
-                  <label className="col-span-3 text-xs text-[#6B7B70]">
+                <div key={indice} className="grid grid-cols-2 items-end gap-2 rounded-lg bg-jardin-fondo p-2 sm:grid-cols-12">
+                  <label className="col-span-2 text-xs text-[#6B7B70] sm:col-span-3">
                     Tipo
                     <select value={linea.tipo_item}
                       onChange={(e) => actualizarLinea(indice, { tipo_item: e.target.value, referencia: '' })}
@@ -528,7 +528,7 @@ function VentasPanel({ onVentaRegistrada }) {
                       <option value="servicio">Servicio</option>
                     </select>
                   </label>
-                  <label className="col-span-5 text-xs text-[#6B7B70]">
+                  <label className="col-span-2 text-xs text-[#6B7B70] sm:col-span-5">
                     {linea.tipo_item === 'producto' ? 'Producto' : 'Servicio'}
                     <select value={linea.referencia}
                       onChange={(e) => actualizarLinea(indice, { referencia: e.target.value })}

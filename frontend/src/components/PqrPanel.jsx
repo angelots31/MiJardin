@@ -132,7 +132,7 @@ function PqrPanel() {
             </span>
           </label>
         </div>
-        <div className="mt-3 flex items-center gap-3">
+        <div className="mt-3 flex flex-wrap items-center gap-3">
           <button onClick={() => setFiltros(FILTROS_VACIOS)}
             className="rounded-lg border border-[#E4DCCD] px-4 py-2 text-sm text-[#23392E] hover:bg-[#FAF3E7]">
             Limpiar filtros
@@ -144,7 +144,7 @@ function PqrPanel() {
       </section>
 
       <section className="overflow-x-auto rounded-xl border border-[#E4DCCD] bg-white">
-        <table className="w-full text-left text-sm">
+        <table className="w-full min-w-[860px] text-left text-sm">
           <thead className="bg-[#23392E] text-[#FAF3E7]">
             <tr>
               <th className="px-3 py-3">Radicado</th>

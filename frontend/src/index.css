@@ -99,10 +99,15 @@ html {
 }
 
 
-@media (max-width: 768px) {
-  .header { padding: 0 1rem; flex-wrap: wrap; height: auto; min-height: var(--header-alto); gap: .35rem; }
-  .header-nav { flex-wrap: wrap; justify-content: flex-end; }
-  .header-nav a { padding: .4rem .65rem; font-size: .85rem; }
+/* En pantallas pequeñas las páginas de contenido respiran con menos relleno. */
+@media (max-width: 640px) {
+  .pagina {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .pagina h1 {
+    font-size: 1.9rem;
+  }
 }
 
 /* Cursor consistente para elementos interactivos */

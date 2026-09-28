@@ -44,3 +44,29 @@
   z-index: 3;
   margin: 0;
 }
+
+/* En móvil el texto del carrusel se reduce para no tapar la imagen. */
+@media (max-width: 640px) {
+  .inicio-carrusel .carousel-info {
+    padding: 1.6rem 1.25rem 1.3rem;
+  }
+
+  .inicio-carrusel .carousel-info h3 {
+    font-size: 1.35rem;
+  }
+
+  .inicio-carrusel .carousel-info p {
+    font-size: 0.85rem;
+  }
+
+  .inicio-carrusel .carousel-indicadores {
+    bottom: 0.8rem;
+    right: 1.25rem;
+  }
+
+  .inicio-carrusel .carousel-flecha {
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+  }
+}

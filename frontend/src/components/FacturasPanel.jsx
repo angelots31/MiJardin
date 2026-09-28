@@ -115,7 +115,7 @@ function FacturasPanel({ soloLectura = false }) {
             </select>
           </label>
         </div>
-        <div className="mt-3 flex items-center gap-3">
+        <div className="mt-3 flex flex-wrap items-center gap-3">
           <button onClick={() => setFiltros(FILTROS_VACIOS)}
             className="rounded-lg border border-jardin-borde px-4 py-2 text-sm text-jardin-verde hover:bg-jardin-fondo">
             Limpiar filtros
@@ -127,7 +127,7 @@ function FacturasPanel({ soloLectura = false }) {
       </section>
 
       <section className="overflow-x-auto rounded-xl border border-jardin-borde bg-white">
-        <table className="w-full text-left text-sm">
+        <table className="w-full min-w-[760px] text-left text-sm">
           <thead className="bg-jardin-verde text-jardin-fondo">
             <tr>
               <th className="px-3 py-3">N.º factura</th>
@@ -191,7 +191,7 @@ function FacturasPanel({ soloLectura = false }) {
 
       {detalle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6">
+          <div className="max-h-[85vh] w-full max-w-2xl overflow-x-auto overflow-y-auto rounded-xl bg-white p-6">
             <div className="mb-4 flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-jardin-verde">Factura {detalle.numero_factura}</h3>
@@ -203,7 +203,7 @@ function FacturasPanel({ soloLectura = false }) {
                 <X size={20} />
               </button>
             </div>
-            <table className="w-full text-left text-sm">
+            <table className="w-full min-w-[520px] text-left text-sm">
               <thead className="border-b border-jardin-borde text-[#6B7B70]">
                 <tr>
                   <th className="py-2">Ítem</th>

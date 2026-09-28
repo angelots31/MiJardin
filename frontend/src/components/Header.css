@@ -152,21 +152,86 @@
   z-index: 5;
 }
 
+/* Botón hamburguesa: solo se muestra en pantallas pequeñas. */
+.header-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 12px;
+  background-color: rgba(250, 243, 231, 0.12);
+  color: var(--crema);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.header-toggle:hover {
+  background-color: rgba(250, 243, 231, 0.22);
+}
+
 @media (max-width: 900px) {
   .header {
     padding: 0.75rem 1rem;
-    flex-wrap: wrap;
     gap: 0.5rem;
-  }
-
-  .header-nav {
-    flex-wrap: wrap;
-    justify-content: flex-end;
   }
 
   .header-nav a,
   .header-logout {
     padding: 0.4rem 0.65rem;
     font-size: 0.85rem;
+  }
+}
+
+/*
+ * En móvil la navegación se despliega desde el botón hamburguesa: así los
+ * enlaces no se amontonan en varias filas dentro de una pantalla angosta.
+ */
+@media (max-width: 700px) {
+  .header {
+    flex-wrap: wrap;
+  }
+
+  .header-toggle {
+    display: inline-flex;
+  }
+
+  .header-nav {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.2rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .header-nav.abierto {
+    display: flex;
+  }
+
+  .header-nav a,
+  .header-logout {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.95rem;
+    text-align: left;
+  }
+
+  .header-user-menu {
+    width: 100%;
+  }
+
+  .header-nav .header-user {
+    width: 100%;
+    max-width: none;
+    justify-content: space-between;
+  }
+
+  /* El desplegable del usuario se integra al menú en lugar de flotar. */
+  .header-user-dropdown {
+    position: static;
+    min-width: 0;
+    margin-top: 0.3rem;
+    box-shadow: none;
   }
 }

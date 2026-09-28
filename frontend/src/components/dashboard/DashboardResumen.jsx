@@ -23,6 +23,30 @@ const rangoInicial = () => {
   return { inicio: inicio.toISOString().slice(0, 10), fin: fin.toISOString().slice(0, 10) };
 };
 
+/** Recorta una etiqueta larga para que no invada el gráfico. */
+const recortar = (texto, maximo) => {
+  const etiqueta = String(texto ?? '');
+  return etiqueta.length > maximo ? `${etiqueta.slice(0, maximo - 1)}…` : etiqueta;
+};
+
+/**
+ * Ancho de la columna de categorías del gráfico "Lo más vendido".
+ * En pantallas angostas se reduce para dejarle espacio a las barras.
+ */
+const useAnchoEjeCategorias = () => {
+  const [ancho, setAncho] = useState(170);
+
+  useEffect(() => {
+    const consulta = window.matchMedia('(max-width: 640px)');
+    const actualizar = () => setAncho(consulta.matches ? 104 : 170);
+    actualizar();
+    consulta.addEventListener('change', actualizar);
+    return () => consulta.removeEventListener('change', actualizar);
+  }, []);
+
+  return ancho;
+};
+
 /**
  * Dashboard con indicadores y gráficos.
  *
@@ -37,6 +61,7 @@ function DashboardResumen({ rol = 'Administrador' }) {
   const [filtros, setFiltros] = useState({ ...rangoInicial(), agrupar: 'dia' });
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const anchoEjeCategorias = useAnchoEjeCategorias();
 
   const cargar = useCallback(async () => {
     try {
@@ -200,7 +225,13 @@ function DashboardResumen({ rol = 'Administrador' }) {
                 <BarChart data={topItems} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 4 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#EDE5D6" horizontal={false} />
                   <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#6B7B70' }} />
-                  <YAxis type="category" dataKey="item" width={170} tick={{ fontSize: 11, fill: '#23392E' }} />
+                  <YAxis
+                    type="category"
+                    dataKey="item"
+                    width={anchoEjeCategorias}
+                    tick={{ fontSize: 11, fill: '#23392E' }}
+                    tickFormatter={(valor) => recortar(valor, anchoEjeCategorias < 170 ? 13 : 24)}
+                  />
                   <Tooltip labelStyle={{ color: VERDE }} />
                   <Bar dataKey="unidades" name="Unidades" fill={SALVIA} radius={[0, 4, 4, 0]} />
                 </BarChart>

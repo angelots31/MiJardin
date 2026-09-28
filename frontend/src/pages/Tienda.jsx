@@ -184,8 +184,8 @@ function Tienda() {
           <div className="flex flex-wrap gap-2">
             {categorias.map((categoria) => <button key={categoria} onClick={() => setFiltro(categoria)} className={`rounded-full px-4 py-2 text-sm font-semibold transition ${filtro === categoria ? 'bg-[#D9714E] text-white' : 'bg-[#F1E7D6] text-[#23392E] hover:bg-[#E8AC4F]'}`}>{categoria}</button>)}
           </div>
-          <div className="flex gap-2">
-            <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar flores o tiendas..." className="w-full rounded-full border border-[#7C9473]/30 bg-white px-5 py-2.5 outline-none focus:ring-2 focus:ring-[#D9714E] sm:w-72" />
+          <div className="flex min-w-0 gap-2">
+            <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar flores o tiendas..." className="w-full min-w-0 rounded-full border border-[#7C9473]/30 bg-white px-5 py-2.5 outline-none focus:ring-2 focus:ring-[#D9714E] sm:w-72" />
             {puedeComprar ? (
               <button onClick={() => setCartOpen(true)} className="cursor-pointer whitespace-nowrap rounded-full bg-[#23392E] px-5 py-2.5 font-bold text-white">🛒 Carrito ({cartCount})</button>
             ) : (

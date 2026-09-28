@@ -1,10 +1,10 @@
-function Input({ label, name, value, onChange, error, type = 'text', placeholder, maxLength, minLength, required = true }) {
+function Input({ label, name, value, onChange, error, type = 'text', placeholder, maxLength, minLength, required = true, mostrarContador = true }) {
   const length = String(value ?? '').length;
-  // El contador solo aparece cuando el campo tiene un límite definido, para
-  // que el usuario sepa cuántos caracteres lleva y cuántos le faltan.
-  const mostrarContador = typeof maxLength === 'number';
+  // El contador aparece solo si el campo tiene un límite definido y la
+  // pantalla lo pide (en el login se oculta para mantener el formulario limpio).
+  const verContador = mostrarContador && typeof maxLength === 'number';
   const cumpleMinimo = typeof minLength !== 'number' || length >= minLength;
-  const alcanzoLimite = mostrarContador && length >= maxLength;
+  const alcanzoLimite = verContador && length >= maxLength;
   const contadorClase = alcanzoLimite
     ? 'text-[#C15E3D]'
     : length > 0 && cumpleMinimo
@@ -17,7 +17,7 @@ function Input({ label, name, value, onChange, error, type = 'text', placeholder
         <label htmlFor={name} className="text-sm font-semibold text-[#23392E]">
           {label}{required ? ' *' : ''}
         </label>
-        {mostrarContador && (
+        {verContador && (
           <span className={`text-xs font-semibold tabular-nums ${contadorClase}`} aria-hidden="true">
             {length}/{maxLength}
           </span>

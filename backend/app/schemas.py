@@ -7,6 +7,19 @@ _DOC_RE = re.compile(r"^\d{6,12}$")
 _PHONE_RE = re.compile(r"^\d{7,10}$")
 
 
+def _validar_password(v):
+    """Regla única de contraseña, compartida por registro y recuperación."""
+    if len(v) < 9:
+        raise ValueError('La contraseña debe tener mínimo 9 caracteres.')
+    if len(v) > 20:
+        raise ValueError('La contraseña no debe superar los 20 caracteres.')
+    if not re.search(r'[A-Za-z]', v):
+        raise ValueError('La contraseña debe contener al menos una letra.')
+    if not re.search(r'\d', v):
+        raise ValueError('La contraseña debe contener al menos un número.')
+    return v
+
+
 class RegisterUser(BaseModel):
     nombres: str
     apellidos: str
@@ -59,20 +72,36 @@ class RegisterUser(BaseModel):
     @field_validator('password')
     @classmethod
     def validate_password(cls, v):
-        if len(v) < 9:
-            raise ValueError('La contraseña debe tener mínimo 9 caracteres.')
-        if len(v) > 20:
-            raise ValueError('La contraseña no debe superar los 20 caracteres.')
-        if not re.search(r'[A-Za-z]', v):
-            raise ValueError('La contraseña debe contener al menos una letra.')
-        if not re.search(r'\d', v):
-            raise ValueError('La contraseña debe contener al menos un número.')
-        return v
+        return _validar_password(v)
 
 
 class LoginUser(BaseModel):
     email: EmailStr
     password: str
+
+
+class SolicitarRecuperacion(BaseModel):
+    """Paso 1 de la recuperación: el usuario indica su correo."""
+    email: EmailStr
+
+
+class RestablecerPassword(BaseModel):
+    """Paso 2 de la recuperación: token del enlace + contraseña nueva."""
+    token: str
+    password: str
+
+    @field_validator('token')
+    @classmethod
+    def validate_token(cls, v):
+        v = (v or '').strip()
+        if len(v) < 10:
+            raise ValueError('El enlace de recuperación no es válido.')
+        return v
+
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v):
+        return _validar_password(v)
 
 
 class UpdateUser(BaseModel):

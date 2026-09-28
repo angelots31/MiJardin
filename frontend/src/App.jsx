@@ -10,6 +10,7 @@ import Index from './pages/Index';
 import QuienesSomos from './pages/QuienesSomos';
 import Contacto from './pages/Contacto';
 import Login from './pages/Login';
+import ResetPassword from './pages/ResetPassword';
 import Tienda from './pages/Tienda';
 import AdminDashboard from './pages/AdminDashboard';
 import PanelEmpleado from './pages/PanelEmpleado';
@@ -34,6 +35,7 @@ function App() {
         <Route path="/quienes-somos" element={<QuienesSomos />} />
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/restablecer-password" element={<ResetPassword />} />
         <Route path="/tienda" element={<Tienda />} />
         <Route path="/admin" element={<ProtectedRoute roles={['Administrador']}><AdminDashboard /></ProtectedRoute>} />
         <Route path="/empleado" element={<ProtectedRoute roles={['Empleado']}><PanelEmpleado /></ProtectedRoute>} />

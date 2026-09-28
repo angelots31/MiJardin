@@ -148,7 +148,7 @@ function MisPqr() {
 
       {abriendo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <form onSubmit={radicar} className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+          <form onSubmit={radicar} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-bold text-jardin-verde">Nueva solicitud</h3>

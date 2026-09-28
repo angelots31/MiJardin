@@ -85,7 +85,7 @@ function Chatbot() {
         <section
           role="dialog"
           aria-label="Chat con Flora, asistente de MiJardín"
-          className="fixed bottom-44 right-5 z-40 flex h-[26rem] w-[21rem] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-[#E4DCCD] bg-white shadow-2xl"
+          className="fixed bottom-44 right-5 z-40 flex h-[26rem] max-h-[calc(100vh-12rem)] w-[21rem] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-[#E4DCCD] bg-white shadow-2xl"
         >
           <header className="flex items-center gap-2 bg-[#23392E] px-4 py-3 text-[#FAF3E7]">
             <Sparkles size={18} />

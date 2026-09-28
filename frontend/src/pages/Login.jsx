@@ -117,8 +117,8 @@ function Login() {
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
-          <Input label="Correo electrónico" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} maxLength={80} />
-          <Input label="Contraseña" name="password" type="password" value={form.password} onChange={handleChange} error={errors.password} maxLength={20} />
+          <Input label="Correo electrónico" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} maxLength={80} mostrarContador={false} />
+          <Input label="Contraseña" name="password" type="password" value={form.password} onChange={handleChange} error={errors.password} maxLength={20} mostrarContador={false} />
           <label className="flex cursor-pointer items-center gap-2 text-sm text-[#4a4a3f]">
             <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 accent-[#D9714E]" />
             Recordarme / No cerrar sesión

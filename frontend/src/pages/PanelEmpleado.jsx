@@ -43,6 +43,21 @@ function PanelEmpleado() {
 
   const [tab, setTab] = useState('dashboard');
   const [error, setError] = useState('');
+  const [mensaje, setMensaje] = useState('');
+
+  // Los avisos de éxito se ocultan solos, como en el panel de administración.
+  useEffect(() => {
+    if (!mensaje) return undefined;
+    const t = setTimeout(() => setMensaje(''), 5000);
+    return () => clearTimeout(t);
+  }, [mensaje]);
+
+  // Al cambiar de sección se limpian los avisos para no arrastrarlos entre pestañas.
+  const cambiarTab = (nuevo) => {
+    setTab(nuevo);
+    setError('');
+    setMensaje('');
+  };
 
   // --- Productos ---
   const [productos, setProductos] = useState([]);
@@ -92,6 +107,7 @@ function PanelEmpleado() {
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       setCreatingProduct(false);
       setProductForm(emptyItemForm);
+      setMensaje(data.message || 'Producto agregado exitosamente.');
       fetchProductos();
     } catch (err) { setError(err.message); }
   };
@@ -106,6 +122,7 @@ function PanelEmpleado() {
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       setEditingProduct(null);
+      setMensaje(data.message || 'Producto actualizado exitosamente.');
       fetchProductos();
     } catch (err) { setError(err.message); }
   };
@@ -116,6 +133,7 @@ function PanelEmpleado() {
       const res = await fetch(`${API_URL}/api/v1/productos/${id}`, { method: 'DELETE', headers: authHeaders });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
+      setMensaje(data.message || 'Producto eliminado exitosamente.');
       fetchProductos();
     } catch (err) { setError(err.message); }
   };
@@ -133,6 +151,7 @@ function PanelEmpleado() {
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       setCreatingServicio(false);
       setServicioForm(emptyItemForm);
+      setMensaje(data.message || 'Servicio agregado exitosamente.');
       fetchServicios();
     } catch (err) { setError(err.message); }
   };
@@ -147,6 +166,7 @@ function PanelEmpleado() {
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
       setEditingServicio(null);
+      setMensaje(data.message || 'Servicio actualizado exitosamente.');
       fetchServicios();
     } catch (err) { setError(err.message); }
   };
@@ -157,6 +177,7 @@ function PanelEmpleado() {
       const res = await fetch(`${API_URL}/api/v1/servicios/${id}`, { method: 'DELETE', headers: authHeaders });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.detail || data.message);
+      setMensaje(data.message || 'Servicio eliminado exitosamente.');
       fetchServicios();
     } catch (err) { setError(err.message); }
   };
@@ -182,7 +203,7 @@ function PanelEmpleado() {
             {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => setTab(id)}
+                onClick={() => cambiarTab(id)}
                 className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors md:w-full md:text-left ${
                   tab === id
                     ? 'bg-jardin-verde text-white shadow-md'
@@ -232,7 +253,7 @@ function PanelEmpleado() {
                   {NAV_ITEMS.find((n) => n.id === tab)?.descripcion}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {tab === 'productos' && <button onClick={() => setCreatingProduct(true)} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar producto</button>}
                 {tab === 'servicios' && <button onClick={() => setCreatingServicio(true)} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-jardin-terracotaOscuro"><Plus size={16} /> Agregar servicio</button>}
                 <Link to="/tienda" className="rounded-full bg-jardin-terracota px-4 py-2 text-sm font-bold text-white md:hidden">Tienda</Link>
@@ -241,7 +262,8 @@ function PanelEmpleado() {
               </div>
             </header>
 
-            {error && <div className="mb-4 rounded-2xl border border-jardin-errorBorder bg-jardin-errorBg p-3 text-sm text-[#B3431E]">{error}</div>}
+            {mensaje && <div className="mb-4 rounded-2xl border border-[#B9CBB2] bg-jardin-successBg p-3 text-sm text-jardin-success" role="status">{mensaje}</div>}
+            {error && <div className="mb-4 rounded-2xl border border-jardin-errorBorder bg-jardin-errorBg p-3 text-sm text-[#B3431E]" role="alert">{error}</div>}
 
           {/* === DASHBOARD === */}
           {tab === 'dashboard' && (
@@ -259,7 +281,7 @@ function PanelEmpleado() {
           {/* === TABLA PRODUCTOS === */}
           {tab === 'productos' && (
             <div className="overflow-x-auto rounded-3xl border border-jardin-borde bg-white shadow-sm">
-              <table className="w-full text-left text-sm">
+              <table className="w-full min-w-[600px] text-left text-sm">
                 <thead className="border-b border-jardin-borde bg-jardin-fondo text-xs font-bold uppercase tracking-wide text-jardin-salvia">
                   <tr>
                     <th className="px-3 py-3">Producto</th>
@@ -291,7 +313,7 @@ function PanelEmpleado() {
           {/* === TABLA SERVICIOS === */}
           {tab === 'servicios' && (
             <div className="overflow-x-auto rounded-3xl border border-jardin-borde bg-white shadow-sm">
-              <table className="w-full text-left text-sm">
+              <table className="w-full min-w-[600px] text-left text-sm">
                 <thead className="border-b border-jardin-borde bg-jardin-fondo text-xs font-bold uppercase tracking-wide text-jardin-salvia">
                   <tr>
                     <th className="px-3 py-3">Servicio</th>
